@@ -537,20 +537,20 @@
         </div>
         <button onclick="toggleVoiceChat()" style="background:#333; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">End</button>
     </div>
-<!-- Load Socket.io Client Library -->
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
     // --- CONFIGURATION ---
-    const PANIC_URL = "https://www.google.com"; // Change this if you want
+    const PANIC_URL = "https://www.google.com";
     let currentUser = null;
     let currentChatId = null;
     let allChats = []; 
-    let allUsers = []; // List of all possible users
-    let activeTab = 'dms'; // 'dms' or 'groups'
+    let allUsers = []; 
+    let activeTab = 'dms'; 
     
     const socket = io();
 
-    // --- DOM ELEMENTS ---
+ 
     const pageLogin = document.getElementById('page-login');
     const pageChat = document.getElementById('page-chat');
     const loginInput = document.getElementById('loginCode');
@@ -561,21 +561,21 @@
     const emptyStatePanel = document.getElementById('emptyState');
     const ctxMenu = document.getElementById('sidebarContextMenu');
     
-    // Modals
+    
     const modalNewChat = document.getElementById('modalNewChat');
     const modalRename = document.getElementById('modalRename');
     const modalList = document.getElementById('modalList');
     const modalTitle = document.getElementById('modalTitle');
     const createGroupBtn = document.getElementById('createGroupBtn');
 
-    // --- PANIC SHORTCUT ---
+   
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.shiftKey && (e.key === 'p' || e.key === 'P')) {
             window.location.replace(PANIC_URL);
         }
     });
 
-    // --- LOGIN ---
+  
     function attemptLogin() {
         const code = loginInput.value.trim();
         if (code) socket.emit('login', code);
@@ -599,12 +599,12 @@
         allUsers = users;
     });
 
-    // --- CHAT LIST LOGIC ---
+ 
     function setTab(tab) {
         activeTab = tab;
-        // Update visual tabs
+       
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        // Find the button that was clicked (simple approximation)
+      
         const buttons = document.querySelectorAll('.tab');
         if(tab === 'dms') buttons[0].classList.add('active');
         else buttons[1].classList.add('active');
@@ -620,7 +620,7 @@
     function renderChatList() {
         chatListEl.innerHTML = '';
         
-        // Filter: Show DMs or Groups based on tab
+
         const filtered = allChats.filter(c => {
             if (activeTab === 'groups') return c.type === 'group';
             return c.type === 'dm';
@@ -632,11 +632,10 @@
             div.onclick = () => openChat(chat.id);
             div.oncontextmenu = (e) => showContextMenu(e, chat.id);
             
-            // For DMs, show the OTHER person's name, not the chat name
+       
             let displayName = chat.name;
             if (chat.type === 'dm') {
-                // If the name is "Matteus & Andrej", just show the one that isn't me
-                // Or simplified: Just use the chat name
+              
             }
 
             div.innerHTML = `
@@ -659,13 +658,13 @@
         document.getElementById('currentChatName').innerText = chat.name;
         document.getElementById('currentChatAvatar').innerText = chat.name.substring(0,2).toUpperCase();
         
-        renderChatList(); // Update highlight
+        renderChatList(); 
         
         messagesListEl.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.5">Loading...</div>';
         socket.emit('get_messages', id);
     }
 
-    // --- MESSAGING ---
+
     socket.on('history_data', ({ chatId, messages }) => {
         if (chatId !== currentChatId) return;
         messagesListEl.innerHTML = '';
@@ -706,7 +705,7 @@
         messagesListEl.scrollTop = messagesListEl.scrollHeight;
     }
 
-    // --- CONTEXT MENU ---
+
     let selectedChatId = null;
     function showContextMenu(e, id) {
         e.preventDefault();
@@ -716,13 +715,13 @@
         ctxMenu.style.top = e.pageY + 'px';
         
         ctxMenu.innerHTML = `
-            <div class="ctx-item" onclick="openRenameModal()">✎ Rename</div>
-            <div class="ctx-item danger" onclick="deleteChat()">🗑 Delete</div>
+            <div class="ctx-item" onclick="openRenameModal()">Rename</div>
+            <div class="ctx-item danger" onclick="deleteChat()">Delete</div>
         `;
     }
     document.addEventListener('click', () => ctxMenu.style.display = 'none');
 
-    // --- CREATE NEW CHAT MODAL ---
+
     let selectedMembers = [];
 
     function openNewChatModal() {
@@ -731,9 +730,9 @@
         modalList.innerHTML = '';
         selectedMembers = [];
         
-        // Populate user list
+        
         allUsers.forEach(u => {
-            if (u.id === currentUser.id) return; // Don't show myself
+            if (u.id === currentUser.id) return; 
             
             const row = document.createElement('div');
             row.className = 'user-row';
@@ -742,19 +741,19 @@
                 <span>${u.name}</span>
             `;
             row.onclick = () => {
-                // Toggle selection
+               
                 if (selectedMembers.includes(u.id)) {
                     selectedMembers = selectedMembers.filter(id => id !== u.id);
                     row.style.background = '#252525';
                 } else {
                     selectedMembers.push(u.id);
-                    row.style.background = '#3b82f6'; // Blue when selected
+                    row.style.background = '#3b82f6'; 
                 }
             };
             modalList.appendChild(row);
         });
 
-        // Show/Hide "Create" button
+     
         createGroupBtn.classList.remove('hidden');
     }
 
@@ -762,8 +761,7 @@
         if (selectedMembers.length === 0) return alert("Select at least one person!");
 
         if (activeTab === 'dms') {
-            // For DM, we usually just want 1 person, but your system supports multi-person DMs too.
-            // Let's create a name based on the selected users.
+         
             const names = allUsers.filter(u => selectedMembers.includes(u.id)).map(u => u.name).join(', ');
             socket.emit('create_chat', { name: names, type: 'dm', members: selectedMembers });
         } else {
@@ -774,7 +772,7 @@
         closeModals();
     }
 
-    // --- RENAME / DELETE ---
+ 
     function openRenameModal() {
         modalRename.style.display = 'flex';
     }
@@ -793,7 +791,7 @@
         }
     }
 
-    // --- UTILS ---
+  
     function closeModals() {
         document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
     }
