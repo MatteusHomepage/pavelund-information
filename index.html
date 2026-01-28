@@ -849,34 +849,33 @@
         }
     });
 
-  function sendMessage() {
+function sendMessage() {
         const input = document.getElementById('msgInput');
         const text = input.value.trim();
         if (!text && !selectedFile) return;
         if (!currentChatId) return;
 
-        const messageData = { 
-            chatId: currentChatId, 
-            text: text || '📎 File attached'
-        };
-
         if (selectedFile) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                messageData.file = {
-                    name: selectedFile.name,
-                    data: e.target.result,
-                    type: selectedFile.type
+                const messageData = { 
+                    chatId: currentChatId, 
+                    text: text || '',
+                    file: {
+                        name: selectedFile.name,
+                        data: e.target.result,
+                        type: selectedFile.type
+                    }
                 };
                 socket.emit('send_msg', messageData);
+                clearFile();
+                input.value = '';
             };
             reader.readAsDataURL(selectedFile);
-            clearFile();
         } else {
-            socket.emit('send_msg', messageData);
+            socket.emit('send_msg', { chatId: currentChatId, text });
+            input.value = '';
         }
-
-        input.value = '';
     }
 
 function renderMessage(msg) {
@@ -884,9 +883,6 @@ function renderMessage(msg) {
         const div = document.createElement('div');
         div.className = `message ${isMe ? 'sent' : 'received'}`;
         div.dataset.msgId = msg.id;
-        div.oncontextmenu = (e) => {
-            showMessageContextMenu(e, msg.id, isMe);
-        };
         
         if (msg.deleted) {
             div.innerHTML = `
@@ -894,6 +890,10 @@ function renderMessage(msg) {
                     <div class="msg-text">This message has been deleted</div>
                 </div>`;
         } else {
+            div.oncontextmenu = (e) => {
+                showMessageContextMenu(e, msg.id, isMe);
+            };
+            
             const editedLabel = msg.edited ? ' <span style="font-size:0.75rem;opacity:0.6">(edited)</span>' : '';
             const fileAttachment = msg.file ? `<div style="margin-top:8px;padding:8px;background:#333;border-radius:6px;font-size:0.85rem;">📎 ${msg.file.name}</div>` : '';
             
