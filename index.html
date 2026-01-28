@@ -501,9 +501,7 @@
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
         
-      #msgInput {
-display: hidden;
-      }   
+      
         .hidden { display: none !important; }
     </style>
 </head>
@@ -588,10 +586,7 @@ display: hidden;
                     <div id="messagesList" class="messages-area">
                         </div>
 
-                    <div class="input-area">
-                        <input type="text" id="msgInput" class="chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
-                        <button class="btn-primary" style="width:auto; padding:0 1.5rem;" onclick="sendMessage()">Send</button>
-                    </div>
+                
 <div class="input-bar">
                     <div id="filePreview" style="display: none;" class="file-preview">
                         <span id="fileName"></span>
