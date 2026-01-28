@@ -222,7 +222,7 @@
         }
 
     
-        .chat-view { flex: 1; display: flex; flex-direction: column; background: var(--bg-dark); }
+        .chat-view { flex: 1; display: flex; flex-direction: column; background: var(--bg-dark); position: relative; }
         
         .chat-view-header {
             padding: 0 1.5rem;
@@ -309,6 +309,110 @@
             border-top: 1px solid var(--border);
             display: flex; gap: 10px;
         }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 8px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn:hover { background: var(--bg-hover); color: var(--accent); }
+
+        .msg-context-menu {
+            position: absolute;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 10000;
+            min-width: 120px;
+        }
+
+        .msg-context-menu .ctx-item {
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .msg-context-menu .ctx-item:hover { background: var(--bg-hover); }
+
+        .picker-popup {
+            position: absolute;
+            bottom: 70px;
+            right: 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            width: 300px;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+        }
+
+        .emoji-item {
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .emoji-item:hover { background: var(--bg-hover); }
+
+        .file-preview {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-hover);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .file-preview button {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .blank-chat-state {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
         .chat-input {
             flex: 1;
             padding: 12px;
@@ -463,12 +567,9 @@
             </div>
 
             <div class="chat-view">
-                <div id="emptyState" style="flex:1; display:grid; place-items:center; color:#555;">
-                    <div style="text-align:center">
-                        <div style="font-size:4rem; margin-bottom:1rem; opacity:0.2">💬</div>
-                        <p>Select a conversation to start messaging</p>
-                    </div>
-                </div>
+                <div id="emptyState" class="blank-chat-state">
+            Select a chat to start messaging
+        </div>
 
                 <div id="activeChat" class="hidden" style="flex:1; display:flex; flex-direction:column; height:100%;">
                     <div class="chat-view-header">
@@ -488,6 +589,28 @@
                         <input type="text" id="msgInput" class="chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
                         <button class="btn-primary" style="width:auto; padding:0 1.5rem;" onclick="sendMessage()">Send</button>
                     </div>
+<div class="input-bar">
+                    <div id="filePreview" style="display: none;" class="file-preview">
+                        <span id="fileName"></span>
+                        <button onclick="clearFile()">✕</button>
+                    </div>
+                    <div style="display: flex; width: 100%; align-items: center;">
+                        <div class="input-actions">
+                            <button class="action-btn" onclick="toggleEmojiPicker()" title="Add emoji">😊</button>
+                            <button class="action-btn" onclick="triggerFileUpload()" title="Attach file">📎</button>
+                        </div>
+                        <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
+                        <input type="text" id="msgInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+
+                <div id="emojiPicker" class="picker-popup">
+                    <div class="emoji-grid" id="emojiGrid"></div>
+                </div>
+
+                <div id="msgContextMenu" class="msg-context-menu"></div>
+
                 </div>
             </div>
         </div>
@@ -540,7 +663,7 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    // --- CONFIGURATION ---
+  
     const PANIC_URL = "https://www.google.com";
     let currentUser = null;
     let currentChatId = null;
@@ -599,6 +722,11 @@
         allUsers = users;
     });
 
+    socket.on('chat_exists', (chatId) => {
+        alert('You already have a chat with this person!');
+        openChat(chatId);
+        closeModals();
+    });
  
     function setTab(tab) {
         activeTab = tab;
@@ -617,10 +745,9 @@
         renderChatList();
     });
 
-    function renderChatList() {
+   function renderChatList() {
         chatListEl.innerHTML = '';
         
-
         const filtered = allChats.filter(c => {
             if (activeTab === 'groups') return c.type === 'group';
             return c.type === 'dm';
@@ -632,10 +759,14 @@
             div.onclick = () => openChat(chat.id);
             div.oncontextmenu = (e) => showContextMenu(e, chat.id);
             
-       
             let displayName = chat.name;
             if (chat.type === 'dm') {
-              
+                
+                const otherUserId = chat.members.find(id => id !== currentUser.id);
+                const otherUser = allUsers.find(u => u.id === otherUserId);
+                if (otherUser) {
+                    displayName = otherUser.name;
+                }
             }
 
             div.innerHTML = `
@@ -649,14 +780,25 @@
         });
     }
 
-    function openChat(id) {
+   function openChat(id) {
         currentChatId = id;
         const chat = allChats.find(c => c.id === id);
         
-        emptyStatePanel.classList.add('hidden');
+        emptyStatePanel.classList.remove('hidden');
+        emptyStatePanel.style.display = 'none';
         activeChatPanel.classList.remove('hidden');
-        document.getElementById('currentChatName').innerText = chat.name;
-        document.getElementById('currentChatAvatar').innerText = chat.name.substring(0,2).toUpperCase();
+        
+        let displayName = chat.name;
+        if (chat.type === 'dm') {
+            const otherUserId = chat.members.find(mid => mid !== currentUser.id);
+            const otherUser = allUsers.find(u => u.id === otherUserId);
+            if (otherUser) {
+                displayName = otherUser.name;
+            }
+        }
+        
+        document.getElementById('currentChatName').innerText = displayName;
+        document.getElementById('currentChatAvatar').innerText = displayName.substring(0,2).toUpperCase();
         
         renderChatList(); 
         
@@ -688,14 +830,21 @@
         input.value = '';
     }
 
-    function renderMessage(msg) {
+   function renderMessage(msg) {
         const isMe = msg.senderId === currentUser.id;
         const div = document.createElement('div');
         div.className = `message ${isMe ? 'sent' : 'received'}`;
+        div.dataset.msgId = msg.id;
+        div.oncontextmenu = (e) => {
+            if (isMe) showMessageContextMenu(e, msg.id);
+        };
+        
+        const editedLabel = msg.edited ? ' <span style="font-size:0.75rem;opacity:0.6">(edited)</span>' : '';
+        
         div.innerHTML = `
             <div class="msg-bubble">
                 <div class="msg-sender">${msg.senderName}</div>
-                <div class="msg-text">${msg.text}</div>
+                <div class="msg-text">${msg.text}${editedLabel}</div>
                 <div class="msg-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
             </div>`;
         messagesListEl.appendChild(div);
@@ -757,13 +906,15 @@
         createGroupBtn.classList.remove('hidden');
     }
 
-    function finalizeGroup() {
+function finalizeGroup() {
         if (selectedMembers.length === 0) return alert("Select at least one person!");
 
         if (activeTab === 'dms') {
-         
-            const names = allUsers.filter(u => selectedMembers.includes(u.id)).map(u => u.name).join(', ');
-            socket.emit('create_chat', { name: names, type: 'dm', members: selectedMembers });
+            if (selectedMembers.length > 1) {
+                return alert("You can only create a DM with one person at a time!");
+            }
+            const otherUser = allUsers.find(u => u.id === selectedMembers[0]);
+            socket.emit('create_chat', { name: otherUser.name, type: 'dm', members: selectedMembers });
         } else {
             const name = prompt("Name this group:");
             if (!name) return;
@@ -804,6 +955,115 @@
         const vc = document.getElementById('vcOverlay');
         vc.style.display = vc.style.display === 'flex' ? 'none' : 'flex';
     }
+
+ 
+    let selectedMessageId = null;
+    const msgCtxMenu = document.getElementById('msgContextMenu');
+
+    function showMessageContextMenu(e, messageId) {
+        e.preventDefault();
+        selectedMessageId = messageId;
+        msgCtxMenu.style.display = 'flex';
+        msgCtxMenu.style.left = e.pageX + 'px';
+        msgCtxMenu.style.top = e.pageY + 'px';
+        
+        msgCtxMenu.innerHTML = `
+            <div class="ctx-item" onclick="editMessage()">Edit</div>
+            <div class="ctx-item danger" onclick="deleteMessage()">Delete</div>
+        `;
+    }
+
+    function editMessage() {
+        const msgDiv = document.querySelector(`[data-msg-id="${selectedMessageId}"]`);
+        if (!msgDiv) return;
+        
+        const textEl = msgDiv.querySelector('.msg-text');
+        const currentText = textEl.textContent.replace(' (edited)', '').trim();
+        const newText = prompt("Edit message:", currentText);
+        
+        if (newText && newText !== currentText) {
+            socket.emit('edit_msg', { chatId: currentChatId, messageId: selectedMessageId, newText });
+        }
+        msgCtxMenu.style.display = 'none';
+    }
+
+    function deleteMessage() {
+        if (confirm("Delete this message?")) {
+            socket.emit('delete_msg', { chatId: currentChatId, messageId: selectedMessageId });
+        }
+        msgCtxMenu.style.display = 'none';
+    }
+
+    socket.on('msg_edited', ({ chatId, messageId, newText }) => {
+        if (chatId !== currentChatId) return;
+        const msgDiv = document.querySelector(`[data-msg-id="${messageId}"]`);
+        if (msgDiv) {
+            const textEl = msgDiv.querySelector('.msg-text');
+            textEl.innerHTML = newText + ' <span style="font-size:0.75rem;opacity:0.6">(edited)</span>';
+        }
+    });
+
+    socket.on('msg_deleted', ({ chatId, messageId }) => {
+        if (chatId !== currentChatId) return;
+        const msgDiv = document.querySelector(`[data-msg-id="${messageId}"]`);
+        if (msgDiv) msgDiv.remove();
+    });
+
+ 
+    let selectedFile = null;
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const emojiPicker = document.getElementById('emojiPicker');
+    const emojiGrid = document.getElementById('emojiGrid');
+
+    const emojis = ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','👍','👎','👏','🙌','👋','🤚','✋','🖐','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁','👅','👄','💋','🩸'];
+
+    emojis.forEach(emoji => {
+        const span = document.createElement('span');
+        span.className = 'emoji-item';
+        span.textContent = emoji;
+        span.onclick = () => insertEmoji(emoji);
+        emojiGrid.appendChild(span);
+    });
+
+    function toggleEmojiPicker() {
+        emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function insertEmoji(emoji) {
+        const input = document.getElementById('msgInput');
+        input.value += emoji;
+        input.focus();
+        emojiPicker.style.display = 'none';
+    }
+
+    function triggerFileUpload() {
+        fileInput.click();
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            selectedFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            filePreview.style.display = 'flex';
+        }
+    }
+
+    function clearFile() {
+        selectedFile = null;
+        fileInput.value = '';
+        filePreview.style.display = 'none';
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!emojiPicker.contains(e.target) && !e.target.classList.contains('action-btn')) {
+            emojiPicker.style.display = 'none';
+        }
+        if (!msgCtxMenu.contains(e.target)) {
+            msgCtxMenu.style.display = 'none';
+        }
+    });
 </script>
 
 </body>
