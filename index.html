@@ -503,6 +503,22 @@
         
       
         .hidden { display: none !important; }
+        
+        .input-area {
+            padding: 1.5rem;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            display: flex; gap: 10px;
+        }
+
+        .input-bar {
+            padding: 1.5rem;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -584,24 +600,24 @@
                     </div>
 
                     <div id="messagesList" class="messages-area">
-                        </div>
+                        </div> 
 
                 
 <div class="input-bar">
-                    <div id="filePreview" style="display: none;" class="file-preview">
-                        <span id="fileName"></span>
-                        <button onclick="clearFile()">✕</button>
-                    </div>
-                    <div style="display: flex; width: 100%; align-items: center;">
-                        <div class="input-actions">
-                            <button class="action-btn" onclick="toggleEmojiPicker()" title="Add emoji">😊</button>
-                            <button class="action-btn" onclick="triggerFileUpload()" title="Attach file">📎</button>
+                        <div id="filePreview" style="display: none;" class="file-preview">
+                            <span id="fileName"></span>
+                            <button onclick="clearFile()">✕</button>
                         </div>
-                        <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
-                        <input type="text" id="msgInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
-                        <button onclick="sendMessage()">Send</button>
+                        <div style="display: flex; width: 100%; align-items: center; gap: 10px;">
+                            <div class="input-actions">
+                                <button class="action-btn" onclick="toggleEmojiPicker()" title="Add emoji">😊</button>
+                                <button class="action-btn" onclick="triggerFileUpload()" title="Attach file">📎</button>
+                            </div>
+                            <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
+                            <input type="text" id="msgInput" class="chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                            <button class="btn-primary" style="width:auto; padding:0 1.5rem;" onclick="sendMessage()">Send</button>
+                        </div>
                     </div>
-                </div>
 
                 <div id="emojiPicker" class="picker-popup">
                     <div class="emoji-grid" id="emojiGrid"></div>
