@@ -1,16 +1,15 @@
 {
-  "name": "v1-schoolchat",
+  "name": "pavelund-school-portal",
   "version": "1.0.0",
-  "description": "School Chat",
+  "description": "School portal chat",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "node-fetch": "^3.3.2",
     "socket.io": "^4.7.2"
-  },
-  "engines": {
-    "node": ">=14.0.0"
   }
 }
