@@ -40,7 +40,7 @@ setInterval(async () => {
         const now = new Date();
         const due = await Scheduled.find({ sendAt: { $lte: now } });
         for (const s of due) {
-            const msgData = { id: Date.now().toString(), chatId: s.chatId, senderId: s.senderId, senderName: s.senderName, text: s.text, file: null, timestamp: new Date(), edited: false, deleted: false };
+            const msgData = { id: Date.now().toString(), chatId: s.chatId, senderId: s.senderId, senderName: s.senderName, text: s.text, file: null, timestamp: new Date(), edited: false, deleted: false, isPlaceholder: false };
             const savedMsg = await new Message(msgData).save();
             const chat = await Chat.findOne({ id: s.chatId });
             if (chat) {
@@ -76,7 +76,7 @@ io.on('connection', (socket) => {
 
   socket.on('send_msg', async (payload) => {
     if (!currentUser) return;
-    const msg = { id: Date.now().toString(), chatId: payload.chatId, senderId: currentUser.id, senderName: currentUser.name, text: payload.text || "", file: payload.file || null, timestamp: new Date(), edited: false, deleted: false };
+    const msg = { id: Date.now().toString(), chatId: payload.chatId, senderId: currentUser.id, senderName: currentUser.name, text: payload.text || "", file: payload.file || null, timestamp: new Date(), edited: false, deleted: false, isPlaceholder: false };
     const saved = await new Message(msg).save();
     const chat = await Chat.findOne({ id: payload.chatId });
     if (chat) chat.members.forEach(mId => io.to(mId).emit('new_msg', { chatId: payload.chatId, message: saved }));
@@ -88,7 +88,6 @@ io.on('connection', (socket) => {
     const savedPlaceholder = await new Message(placeholder).save();
     const chat = await Chat.findOne({ id: payload.chatId });
     if (chat) chat.members.forEach(mId => io.to(mId).emit('new_msg', { chatId: payload.chatId, message: savedPlaceholder }));
-    
     await new Scheduled({ chatId: payload.chatId, text: payload.text, senderId: currentUser.id, senderName: currentUser.name, sendAt: new Date(Date.now() + payload.delayMs) }).save();
   });
 
