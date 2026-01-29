@@ -116,10 +116,17 @@ io.on('connection', (socket) => {
     io.emit('msg_edited', p);
   });
 
-  socket.on('delete_msg', async (p) => {
-    await Message.deleteOne({ id: p.messageId, senderId: currentUser.id });
-    io.emit('msg_deleted', p);
+socket.on('delete_msg', async (p) => {
+    if (!currentUser) return;
+    await Message.updateOne(
+      { id: p.messageId, senderId: currentUser.id }, 
+      { text: "", file: null, deleted: true }
+    );
+    const chat = await Chat.findOne({ id: p.chatId });
+    if (chat) {
+        chat.members.forEach(mId => io.to(mId).emit('msg_deleted', p));
+    }
   });
-});
 
 server.listen(PORT, () => console.log(`Server port ${PORT}`));
+
