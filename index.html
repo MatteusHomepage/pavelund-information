@@ -390,7 +390,7 @@
 
         .msg-context-menu .ctx-item:hover { background: var(--bg-hover); }
 
-   .picker-popup {
+ .picker-popup {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -399,6 +399,7 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 1.5rem;
+            padding-top: 3rem;
             display: none;
             box-shadow: 0 8px 24px rgba(0,0,0,0.7);
             z-index: 1000;
@@ -408,10 +409,35 @@
             width: 400px;
         }
 
+        .picker-popup::-webkit-scrollbar {
+            width: 6px;
+        }
+        .picker-popup::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .picker-popup::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 10px;
+        }
+        .picker-popup::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .close-emoji {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            transition: color 0.2s;
+        }
+        .close-emoji:hover { color: var(--danger); }
+
      .emoji-grid {
             display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 8px;
         }
 
         .emoji-item {
@@ -668,7 +694,8 @@
                         </div>
                     </div>
 
-                <div id="emojiPicker" class="picker-popup">
+              <div id="emojiPicker" class="picker-popup">
+                    <span class="close-emoji" onclick="toggleEmojiPicker()">✕</span>
                     <div class="emoji-grid" id="emojiGrid"></div>
                 </div>
 
@@ -1157,7 +1184,12 @@ function finalizeGroup() {
     });
 
     function toggleEmojiPicker() {
-        emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'block' : 'none';
+        const picker = document.getElementById('emojiPicker');
+        if (picker.style.display === 'none' || picker.style.display === '') {
+            picker.style.display = 'block';
+        } else {
+            picker.style.display = 'none';
+        }
     }
 
     function insertEmoji(emoji) {
