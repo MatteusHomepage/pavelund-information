@@ -1,23 +1,55 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
-const fs = require('fs');
+const mongoose = require('mongoose');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  maxHttpBufferSize: 1e8
+const io = new Server(server, { 
+    maxHttpBufferSize: 1e8,
+    cors: { origin: "*" }
 });
-
 
 const PORT = process.env.PORT || 3000;
+const MONGO_URI = "mongodb+srv://admin:admin@secretchatcluster.92tgwe3.mongodb.net/chatData?retryWrites=true&w=majority";
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+mongoose.connect(MONGO_URI).then(() => console.log("DB Connected")).catch(e => console.log(e));
+
+const ChatSchema = new mongoose.Schema({
+    id: String,
+    name: String,
+    type: String,
+    members: [String],
+    createdBy: String
 });
 
-app.use(express.static(__dirname));
+const MsgSchema = new mongoose.Schema({
+    chatId: String,
+    id: String,
+    senderId: String,
+    senderName: String,
+    text: String,
+    file: Object,
+    timestamp: Date,
+    edited: Boolean,
+    deleted: Boolean
+});
 
+const ScheduledSchema = new mongoose.Schema({
+    chatId: String,
+    text: String,
+    senderId: String,
+    senderName: String,
+    sendAt: Date
+});
+
+const Chat = mongoose.model('Chat', ChatSchema);
+const Message = mongoose.model('Message', MsgSchema);
+const Scheduled = mongoose.model('Scheduled', ScheduledSchema);
+
+app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
+app.use(express.static(__dirname));
 
 const USERS_DB = {
   "Vinden4554": { name: "Matteus Aydin", id: "Vinden4554" },
@@ -25,197 +57,137 @@ const USERS_DB = {
   "1234": { name: "Felix Nydén Leander", id: "1234" }
 };
 
+setInterval(async () => {
+    try {
+        const now = new Date();
+        const due = await Scheduled.find({ sendAt: { $lte: now } });
+        for (const s of due) {
+            const msgData = {
+                id: Date.now().toString(),
+                chatId: s.chatId,
+                senderId: s.senderId,
+                senderName: s.senderName,
+                text: s.text,
+                file: null,
+                timestamp: new Date(),
+                edited: false,
+                deleted: false
+            };
+            await new Message(msgData).save();
+            const chat = await Chat.findOne({ id: s.chatId });
+            if (chat) {
+                chat.members.forEach(mId => {
+                    io.to(mId).emit('new_msg', { chatId: s.chatId, message: msgData });
+                });
+            }
+            await Scheduled.deleteOne({ _id: s._id });
+        }
+    } catch (e) {}
+}, 10000);
 
-let DATA = {
-
-  chats: [
-    { id: 'general', name: 'General Class', type: 'group', members: ['Vinden4554', '6767', '1234'] }
-  ],
-  messages: {} 
-};
-
-
-if (fs.existsSync('chat-data.json')) {
-  try {
-    const raw = fs.readFileSync('chat-data.json');
-    const saved = JSON.parse(raw);
-    DATA.chats = saved.chats || DATA.chats;
-    DATA.messages = saved.messages || DATA.messages;
-  } catch(e) { console.log("No save found, starting fresh."); }
-}
-
-function saveData() {
-  fs.writeFileSync('chat-data.json', JSON.stringify(DATA));
-}
+setInterval(() => {
+    if (process.env.RENDER_EXTERNAL_HOSTNAME) {
+        fetch(`https://${process.env.RENDER_EXTERNAL_HOSTNAME}`).catch(() => {});
+    }
+}, 300000);
 
 io.on('connection', (socket) => {
   let currentUser = null;
 
-
-  socket.on('login', (code) => {
+  socket.on('login', async (code) => {
     if (USERS_DB[code]) {
       currentUser = USERS_DB[code];
       socket.join(currentUser.id);
       socket.emit('login_success', currentUser);
-      
-    
       socket.emit('user_list', Object.values(USERS_DB));
-      
-    
-      socket.emit('update_chats', DATA.chats);
+      const chats = await Chat.find();
+      socket.emit('update_chats', chats);
     } else {
       socket.emit('login_fail');
     }
   });
 
-
-  socket.on('get_messages', (chatId) => {
-    if (!currentUser) return;
-    const history = DATA.messages[chatId] || [];
+  socket.on('get_messages', async (chatId) => {
+    const history = await Message.find({ chatId }).sort({ timestamp: 1 });
     socket.emit('history_data', { chatId, messages: history });
   });
 
-
-socket.on('send_msg', (payload) => {
+  socket.on('send_msg', async (payload) => {
     if (!currentUser) return;
     const { chatId, text, file } = payload;
     const msg = {
       id: Date.now().toString(),
+      chatId,
       senderId: currentUser.id,
       senderName: currentUser.name,
-      text: text,
+      text: text || "",
       file: file || null,
-      timestamp: new Date().toISOString()
+      timestamp: new Date(),
+      edited: false,
+      deleted: false
     };
-    if (!DATA.messages[chatId]) DATA.messages[chatId] = [];
-    DATA.messages[chatId].push(msg);
-    saveData();
-    const chat = DATA.chats.find(c => c.id === chatId);
+    await new Message(msg).save();
+    const chat = await Chat.findOne({ id: chatId });
     if (chat) {
-      chat.members.forEach(mId => {
-        io.to(mId).emit('new_msg', { chatId, message: msg });
-      });
+        chat.members.forEach(mId => {
+            io.to(mId).emit('new_msg', { chatId, message: msg });
+        });
     }
-});
+  });
 
- socket.on('schedule_msg', (payload) => {
+  socket.on('schedule_msg', async (payload) => {
     if (!currentUser) return;
     const { chatId, text, delayMs } = payload;
-    const sender = currentUser;
-
-    setTimeout(() => {
-      const msg = {
-        id: Date.now().toString(),
-        senderId: sender.id,
-        senderName: sender.name,
-        text: text,
-        file: null,
-        timestamp: new Date().toISOString()
-      };
-
-      if (!DATA.messages[chatId]) DATA.messages[chatId] = [];
-      DATA.messages[chatId].push(msg);
-      saveData();
-
-      const chat = DATA.chats.find(c => c.id === chatId);
-      if (chat) {
-        chat.members.forEach(mId => {
-          io.to(mId).emit('new_msg', { chatId, message: msg });
-        });
-      }
-    }, delayMs);
+    await new Scheduled({
+        chatId,
+        text,
+        senderId: currentUser.id,
+        senderName: currentUser.name,
+        sendAt: new Date(Date.now() + delayMs)
+    }).save();
   });
-  
-  socket.on('create_chat', ({ name, type, members }) => {
+
+  socket.on('create_chat', async ({ name, type, members }) => {
     if (!currentUser) return;
-    
- 
     if(!members.includes(currentUser.id)) members.push(currentUser.id);
-
-
-    if (type === 'dm' && members.length === 2) {
-      const existingDM = DATA.chats.find(c => 
-        c.type === 'dm' && 
-        c.members.length === 2 &&
-        c.members.includes(members[0]) && 
-        c.members.includes(members[1])
-      );
-      
-      if (existingDM) {
-        socket.emit('chat_exists', existingDM.id);
-        return;
-      }
-    }
-
-    const newChat = {
-      id: 'c_' + Date.now(),
-      name: name,
-      type: type, 
-      members: members,
-      createdBy: currentUser.id
-    };
-
-    DATA.chats.push(newChat);
-    saveData();
-    io.emit('update_chats', DATA.chats);
+    const newChat = new Chat({ 
+        id: 'c_' + Date.now(), 
+        name, 
+        type, 
+        members, 
+        createdBy: currentUser.id 
+    });
+    await newChat.save();
+    const chats = await Chat.find();
+    io.emit('update_chats', chats);
   });
 
-
-  socket.on('rename_chat', ({ chatId, newName }) => {
-    const chat = DATA.chats.find(c => c.id === chatId);
-    if (chat) {
-      chat.name = newName;
-      saveData();
-      io.emit('update_chats', DATA.chats);
-    }
+  socket.on('rename_chat', async ({ chatId, newName }) => {
+    await Chat.updateOne({ id: chatId }, { name: newName });
+    const chats = await Chat.find();
+    io.emit('update_chats', chats);
   });
 
-socket.on('delete_chat', (chatId) => {
-    DATA.chats = DATA.chats.filter(c => c.id !== chatId);
-    delete DATA.messages[chatId];
-    saveData();
-    io.emit('update_chats', DATA.chats);
+  socket.on('delete_chat', async (chatId) => {
+    await Chat.deleteOne({ id: chatId });
+    await Message.deleteMany({ chatId });
+    const chats = await Chat.find();
+    io.emit('update_chats', chats);
   });
 
-
-  socket.on('edit_msg', ({ chatId, messageId, newText }) => {
+  socket.on('edit_msg', async ({ chatId, messageId, newText }) => {
     if (!currentUser) return;
-    
-    const messages = DATA.messages[chatId];
-    if (!messages) return;
-    
-    const msg = messages.find(m => m.id === messageId);
-    if (msg && msg.senderId === currentUser.id) {
-      msg.text = newText;
-      msg.edited = true;
-      saveData();
-      io.emit('msg_edited', { chatId, messageId, newText });
-    }
+    await Message.updateOne({ id: messageId, senderId: currentUser.id }, { text: newText, edited: true });
+    io.emit('msg_edited', { chatId, messageId, newText });
   });
 
-
-  socket.on('delete_msg', ({ chatId, messageId }) => {
+  socket.on('delete_msg', async ({ chatId, messageId }) => {
     if (!currentUser) return;
-    
-    const messages = DATA.messages[chatId];
-    if (!messages) return;
-    
-    const msgIndex = messages.findIndex(m => m.id === messageId);
-    if (msgIndex !== -1 && messages[msgIndex].senderId === currentUser.id) {
-      messages.splice(msgIndex, 1);
-      saveData();
-      io.emit('msg_deleted', { chatId, messageId });
-    }
+    await Message.deleteOne({ id: messageId, senderId: currentUser.id });
+    io.emit('msg_deleted', { chatId, messageId });
   });
 });
-    
-
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
-
-
-
