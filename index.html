@@ -745,7 +745,7 @@
                     </div>
 
               <div id="emojiPicker" class="picker-popup">
-                   <span class="close-emoji" onclick="toggleEmojiPicker()">
+                  <span class="close-emoji" onclick="toggleEmojiPicker(event)">
                         <svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </span>
                     <div class="emoji-grid" id="emojiGrid"></div>
@@ -754,7 +754,7 @@
                     <div id="timedMsgMenu" class="timed-menu">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <h4>Schedule Message</h4>
-                       <span class="close-emoji" style="position:static;" onclick="toggleTimedMenu()">
+                       <span class="close-emoji" style="position:static;" onclick="toggleTimedMenu(event)">
                             <svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                         </span>
                     </div>
@@ -1262,7 +1262,7 @@ function finalizeGroup() {
     });
 
 function toggleEmojiPicker(e) {
-        e.stopPropagation();
+        if (e && e.stopPropagation) e.stopPropagation();
         const picker = document.getElementById('emojiPicker');
         const timed = document.getElementById('timedMsgMenu');
         timed.style.display = 'none';
@@ -1325,8 +1325,8 @@ document.addEventListener('click', (e) => {
 
     let timedUpdateInterval;
 
-    function toggleTimedMenu(e) {
-        e.stopPropagation();
+function toggleTimedMenu(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
         const menu = document.getElementById('timedMsgMenu');
         const picker = document.getElementById('emojiPicker');
         picker.style.display = 'none';
