@@ -74,15 +74,16 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on('send_msg', (payload) => {
+socket.on('send_msg', (payload) => {
     if (!currentUser) return;
     
-    const { chatId, text } = payload;
+    const { chatId, text, file } = payload;
     const msg = {
       id: Date.now().toString(),
       senderId: currentUser.id,
       senderName: currentUser.name,
       text: text,
+      file: file || null,
       timestamp: new Date().toISOString()
     };
 
@@ -90,7 +91,6 @@ io.on('connection', (socket) => {
     DATA.messages[chatId].push(msg);
     saveData();
 
-   
     io.emit('new_msg', { chatId, message: msg });
   });
 
@@ -183,3 +183,4 @@ socket.on('delete_chat', (chatId) => {
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
