@@ -24,10 +24,12 @@ const Scheduled = mongoose.model('Scheduled', ScheduledSchema);
 
 mongoose.connect(MONGO_URI).then(async () => {
     console.log("DB Connected");
-    const general = await Chat.findOne({ id: 'general' });
-    if (!general) {
-        await new Chat({ id: 'general', name: 'General Class', type: 'group', members: ["Vinden4554", "6767", "1234"], createdBy: 'system' }).save();
-    }
+    try {
+        const general = await Chat.findOne({ id: 'general' });
+        if (!general) {
+            await new Chat({ id: 'general', name: 'General Class', type: 'group', members: ["Vinden4554", "6767", "1234"], createdBy: 'system' }).save();
+        }
+    } catch (e) {}
 }).catch(e => { console.log(e); process.exit(1); });
 
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
@@ -58,6 +60,7 @@ setInterval(() => {
 
 io.on('connection', (socket) => {
   let currentUser = null;
+
   socket.on('login', async (code) => {
     if (USERS_DB[code]) {
       currentUser = USERS_DB[code];
@@ -112,21 +115,17 @@ io.on('connection', (socket) => {
   });
 
   socket.on('edit_msg', async (p) => {
+    if (!currentUser) return;
     await Message.updateOne({ id: p.messageId, senderId: currentUser.id }, { text: p.newText, edited: true });
     io.emit('msg_edited', p);
   });
 
-socket.on('delete_msg', async (p) => {
+  socket.on('delete_msg', async (p) => {
     if (!currentUser) return;
-    await Message.updateOne(
-      { id: p.messageId, senderId: currentUser.id }, 
-      { text: "", file: null, deleted: true }
-    );
+    await Message.updateOne({ id: p.messageId, senderId: currentUser.id }, { text: "", file: null, deleted: true });
     const chat = await Chat.findOne({ id: p.chatId });
-    if (chat) {
-        chat.members.forEach(mId => io.to(mId).emit('msg_deleted', p));
-    }
+    if (chat) chat.members.forEach(mId => io.to(mId).emit('msg_deleted', p));
   });
+});
 
-server.listen(PORT, () => console.log(`Server port ${PORT}`));
-
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
