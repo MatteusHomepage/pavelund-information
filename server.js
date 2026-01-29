@@ -98,7 +98,34 @@ socket.on('send_msg', (payload) => {
     }
 });
 
- 
+ socket.on('schedule_msg', (payload) => {
+    if (!currentUser) return;
+    const { chatId, text, delayMs } = payload;
+    const sender = currentUser;
+
+    setTimeout(() => {
+      const msg = {
+        id: Date.now().toString(),
+        senderId: sender.id,
+        senderName: sender.name,
+        text: text,
+        file: null,
+        timestamp: new Date().toISOString()
+      };
+
+      if (!DATA.messages[chatId]) DATA.messages[chatId] = [];
+      DATA.messages[chatId].push(msg);
+      saveData();
+
+      const chat = DATA.chats.find(c => c.id === chatId);
+      if (chat) {
+        chat.members.forEach(mId => {
+          io.to(mId).emit('new_msg', { chatId, message: msg });
+        });
+      }
+    }, delayMs);
+  });
+  
   socket.on('create_chat', ({ name, type, members }) => {
     if (!currentUser) return;
     
@@ -187,6 +214,7 @@ socket.on('delete_chat', (chatId) => {
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
 
 
 
