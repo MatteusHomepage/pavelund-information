@@ -371,17 +371,17 @@
         .action-btn:hover { background: var(--bg-hover); color: var(--accent); }
         .action-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-        .msg-context-menu {
-            position: absolute;
+      .msg-context-menu {
+            position: fixed;
             background: var(--bg-panel);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 0.5rem 0;
             display: none;
             flex-direction: column;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            z-index: 10000;
-            min-width: 120px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            z-index: 99999;
+            min-width: 140px;
         }
 
         .msg-context-menu .ctx-item {
@@ -721,7 +721,7 @@
                                 </button>
                             </div>
                             <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
-                            <input type="text" id="msgInput" class="chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                            <input type="text" id="msgInput" class="chat-input" placeholder="Type a message...">
                             <button class="btn-primary" style="width:auto; padding:0 1.5rem; height:46px;" onclick="sendMessage()">Send</button>
                         </div>
                     </div>
@@ -999,33 +999,44 @@ socket.on('new_msg', ({ chatId, message }) => {
     }
 });
 
-function sendMessage() {
-    const input = document.getElementById('msgInput');
-    const text = input.value.trim();
-    if (!text && !selectedFile) return;
-    if (!currentChatId) return;
+let isSending = false;
+    function sendMessage() {
+        if (isSending) return;
+        const input = document.getElementById('msgInput');
+        const text = input.value.trim();
+        if (!text && !selectedFile) return;
+        if (!currentChatId) return;
 
-    if (selectedFile) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const messageData = { 
-                chatId: currentChatId, 
-                text: text || '',
-                file: {
-                    name: selectedFile.name,
-                    data: e.target.result,
-                    type: selectedFile.type
-                }
+        isSending = true;
+        if (selectedFile) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                socket.emit('send_msg', { 
+                    chatId: currentChatId, 
+                    text: text || '',
+                    file: {
+                        name: selectedFile.name,
+                        data: e.target.result,
+                        type: selectedFile.type
+                    }
+                });
+                clearFile();
+                isSending = false;
             };
-            socket.emit('send_msg', messageData);
-            clearFile();
-        };
-        reader.readAsDataURL(selectedFile);
-    } else {
-        socket.emit('send_msg', { chatId: currentChatId, text });
+            reader.readAsDataURL(selectedFile);
+        } else {
+            socket.emit('send_msg', { chatId: currentChatId, text });
+            setTimeout(() => { isSending = false; }, 100);
+        }
+        input.value = '';
     }
-    input.value = '';
-}
+
+    document.getElementById('msgInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
 
 function renderMessage(msg) {
         const isMe = msg.senderId === currentUser.id;
@@ -1041,10 +1052,12 @@ function renderMessage(msg) {
                     <div class="msg-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
                 </div>`;
         } else {
-            div.oncontextmenu = (e) => {
+            div.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopImmediatePropagation();
                 if (msg.isPlaceholder) return;
                 showMessageContextMenu(e, msg.id, isMe, !!msg.file, msg.file);
-            };
+            });
             
             const editedLabel = msg.edited ? ' <span class="msg-edited">(edited)</span>' : '';
             const msgStyle = msg.isPlaceholder ? 'style="font-style:italic; opacity:0.7;"' : '';
