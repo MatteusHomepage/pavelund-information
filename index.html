@@ -398,7 +398,7 @@
             background: var(--bg-panel);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 1rem;
             padding-top: 3rem;
             display: none;
             box-shadow: 0 8px 24px rgba(0,0,0,0.7);
@@ -406,11 +406,11 @@
             max-height: 400px;
             overflow-y: auto;
             overflow-x: hidden;
-            width: 400px;
+            width: 380px;
         }
 
         .picker-popup::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
         .picker-popup::-webkit-scrollbar-track {
             background: transparent;
@@ -418,9 +418,6 @@
         .picker-popup::-webkit-scrollbar-thumb {
             background: #444;
             border-radius: 10px;
-        }
-        .picker-popup::-webkit-scrollbar-thumb:hover {
-            background: #555;
         }
 
         .close-emoji {
@@ -440,13 +437,17 @@
             gap: 8px;
         }
 
-        .emoji-item {
-            font-size: 1.5rem;
+      .emoji-item {
+            font-size: 1.4rem;
             cursor: pointer;
-            padding: 6px;
+            padding: 5px;
             border-radius: 6px;
             text-align: center;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
 
         .emoji-item:hover { background: var(--bg-hover); }
@@ -479,6 +480,43 @@
             font-size: 1.1rem;
         }
 
+.timed-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+            z-index: 2000;
+            width: 380px;
+        }
+
+        .timed-menu h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .timed-display-box {
+            background: #252525;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .timed-display-box b {
+            color: var(--accent);
+        }
+        
         .chat-input {
             flex: 1;
             padding: 12px;
@@ -684,9 +722,10 @@
                             <button onclick="clearFile()">✕</button>
                         </div>
                         <div style="display: flex; width: 100%; align-items: center; gap: 10px;">
-                            <div class="input-actions">
+                           <div class="input-actions">
                                 <button class="action-btn" onclick="toggleEmojiPicker()" title="Add emoji">😊</button>
                                 <button class="action-btn" onclick="triggerFileUpload()" title="Attach file">📎</button>
+                                <button class="action-btn" onclick="toggleTimedMenu()" title="Timed Message">🕒</button>
                             </div>
                             <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
                             <input type="text" id="msgInput" class="chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -697,6 +736,26 @@
               <div id="emojiPicker" class="picker-popup">
                     <span class="close-emoji" onclick="toggleEmojiPicker()">✕</span>
                     <div class="emoji-grid" id="emojiGrid"></div>
+                </div>
+
+                    <div id="timedMsgMenu" class="timed-menu">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4>Schedule Message</h4>
+                        <span class="close-emoji" style="position:static;" onclick="toggleTimedMenu()">✕</span>
+                    </div>
+                    <div class="timed-display-box">
+                        <div>Current Time: <b id="currentTimeLabel">00:00:00</b></div>
+                        <div>Message will send at: <b id="scheduledTimeLabel">00:00:00</b></div>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label>Delay in minutes:</label>
+                        <input type="number" id="timedDelayInput" class="form-input" value="1" min="1" oninput="updateTimedDisplay()">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label>Message text:</label>
+                        <input type="text" id="timedTextInput" class="form-input" placeholder="What should I send later?">
+                    </div>
+                    <button class="btn-primary" onclick="confirmTimedMessage()">Schedule</button>
                 </div>
 
                 <div id="msgContextMenu" class="msg-context-menu"></div>
@@ -1234,6 +1293,49 @@ function finalizeGroup() {
         attemptLogin(savedCode);
     }
 });
+
+    let timedUpdateInterval;
+
+    function toggleTimedMenu() {
+        const menu = document.getElementById('timedMsgMenu');
+        const isOpening = menu.style.display === 'none' || menu.style.display === '';
+        menu.style.display = isOpening ? 'flex' : 'none';
+        
+        if (isOpening) {
+            updateTimedDisplay();
+            timedUpdateInterval = setInterval(updateTimedDisplay, 1000);
+        } else {
+            clearInterval(timedUpdateInterval);
+        }
+    }
+
+    function updateTimedDisplay() {
+        const now = new Date();
+        const delay = parseInt(document.getElementById('timedDelayInput').value) || 0;
+        const future = new Date(now.getTime() + delay * 60000);
+        
+        document.getElementById('currentTimeLabel').innerText = now.toLocaleTimeString();
+        document.getElementById('scheduledTimeLabel').innerText = future.toLocaleTimeString();
+    }
+
+    function confirmTimedMessage() {
+        const delay = parseInt(document.getElementById('timedDelayInput').value);
+        const text = document.getElementById('timedTextInput').value.trim();
+        
+        if (!text) return alert("Enter a message");
+        if (!delay || delay < 1) return alert("Enter valid minutes");
+        if (!currentChatId) return alert("Select a chat first");
+
+        socket.emit('schedule_msg', {
+            chatId: currentChatId,
+            text: text,
+            delayMs: delay * 60000
+        });
+
+        alert(`Message scheduled to send in ${delay} minutes.`);
+        document.getElementById('timedTextInput').value = '';
+        toggleTimedMenu();
+    }
 </script>
 
 </body>
