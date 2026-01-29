@@ -391,7 +391,7 @@
 
         .msg-context-menu .ctx-item:hover { background: var(--bg-hover); }
 
- .picker-popup {
+.picker-popup {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -400,14 +400,14 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 1rem;
-            padding-top: 3rem;
+            padding-top: 3.5rem;
             display: none;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.8);
             z-index: 1000;
             max-height: 400px;
             overflow-y: auto;
             overflow-x: hidden;
-            width: 380px;
+            width: 360px;
         }
 
         .picker-popup::-webkit-scrollbar {
@@ -436,21 +436,22 @@
 
      .emoji-grid {
             display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            width: 100%;
+            padding-right: 10px;
         }
 
-      .emoji-item {
-            font-size: 1.4rem;
+        .emoji-item {
+            font-size: 1.6rem;
             cursor: pointer;
             padding: 5px;
-            border-radius: 6px;
+            border-radius: 8px;
             text-align: center;
             transition: background 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            line-height: 1;
         }
 
         .emoji-item:hover { background: var(--bg-hover); }
@@ -905,14 +906,17 @@ socket.on('login_success', (user) => {
         closeModals();
     });
  
-    function setTab(tab) {
+   function setTab(tab) {
         activeTab = tab;
-       
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      
         const buttons = document.querySelectorAll('.tab');
         if(tab === 'dms') buttons[0].classList.add('active');
         else buttons[1].classList.add('active');
+        
+        currentChatId = null;
+        activeChatPanel.classList.add('hidden');
+        emptyStatePanel.style.display = 'flex';
+        emptyStatePanel.classList.remove('hidden');
         
         renderChatList();
     }
@@ -1255,14 +1259,14 @@ function finalizeGroup() {
         emojiGrid.appendChild(span);
     });
 
-    function toggleEmojiPicker() {
+    function toggleEmojiPicker(e) {
+        if(e) e.stopPropagation();
         const picker = document.getElementById('emojiPicker');
-        if (picker.style.display === 'none' || picker.style.display === '') {
-            picker.style.display = 'block';
-        } else {
-            picker.style.display = 'none';
-        }
+        const isHidden = picker.style.display === 'none' || picker.style.display === '';
+        picker.style.display = isHidden ? 'block' : 'none';
+        document.getElementById('timedMsgMenu').style.display = 'none';
     }
+
 
     function insertEmoji(emoji) {
         const input = document.getElementById('msgInput');
@@ -1291,9 +1295,16 @@ function finalizeGroup() {
     filePreview.style.display = 'none';
 }
 
-    document.addEventListener('click', (e) => {
-        if (!emojiPicker.contains(e.target) && !e.target.classList.contains('action-btn')) {
+ document.addEventListener('click', (e) => {
+        const emojiPicker = document.getElementById('emojiPicker');
+        const timedMenu = document.getElementById('timedMsgMenu');
+        
+        if (!emojiPicker.contains(e.target)) {
             emojiPicker.style.display = 'none';
+        }
+        if (!timedMenu.contains(e.target)) {
+            timedMenu.style.display = 'none';
+            clearInterval(timedUpdateInterval);
         }
         if (!msgCtxMenu.contains(e.target)) {
             msgCtxMenu.style.display = 'none';
@@ -1309,12 +1320,14 @@ function finalizeGroup() {
 
     let timedUpdateInterval;
 
-    function toggleTimedMenu() {
+    function toggleTimedMenu(e) {
+        if(e) e.stopPropagation();
         const menu = document.getElementById('timedMsgMenu');
-        const isOpening = menu.style.display === 'none' || menu.style.display === '';
-        menu.style.display = isOpening ? 'flex' : 'none';
+        const isHidden = menu.style.display === 'none' || menu.style.display === '';
+        menu.style.display = isHidden ? 'flex' : 'none';
+        document.getElementById('emojiPicker').style.display = 'none';
         
-        if (isOpening) {
+        if (isHidden) {
             updateTimedDisplay();
             timedUpdateInterval = setInterval(updateTimedDisplay, 1000);
         } else {
