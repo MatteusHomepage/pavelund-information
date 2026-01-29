@@ -371,7 +371,7 @@
         .action-btn:hover { background: var(--bg-hover); color: var(--accent); }
         .action-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-      .msg-context-menu {
+.msg-context-menu {
             position: fixed;
             background: var(--bg-panel);
             border: 1px solid var(--border);
@@ -381,7 +381,7 @@
             flex-direction: column;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8);
             z-index: 99999;
-            min-width: 140px;
+            width: 150px;
         }
 
         .msg-context-menu .ctx-item {
@@ -999,15 +999,18 @@ socket.on('new_msg', ({ chatId, message }) => {
     }
 });
 
-let isSending = false;
+let lastSendTime = 0;
     function sendMessage() {
-        if (isSending) return;
+        const now = Date.now();
+        if (now - lastSendTime < 500) return;
+        
         const input = document.getElementById('msgInput');
         const text = input.value.trim();
         if (!text && !selectedFile) return;
         if (!currentChatId) return;
 
-        isSending = true;
+        lastSendTime = now;
+
         if (selectedFile) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1021,15 +1024,21 @@ let isSending = false;
                     }
                 });
                 clearFile();
-                isSending = false;
             };
             reader.readAsDataURL(selectedFile);
         } else {
             socket.emit('send_msg', { chatId: currentChatId, text });
-            setTimeout(() => { isSending = false; }, 100);
         }
         input.value = '';
     }
+
+    document.getElementById('msgInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            sendMessage();
+        }
+    }, true);
 
     document.getElementById('msgInput').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
@@ -1195,11 +1204,25 @@ function finalizeGroup() {
     const msgCtxMenu = document.getElementById('msgContextMenu');
 
 function showMessageContextMenu(e, messageId, isMe, isFile, fileObj) {
-        e.preventDefault();
         selectedMessageId = messageId;
         msgCtxMenu.style.display = 'flex';
-        msgCtxMenu.style.left = e.pageX + 'px';
-        msgCtxMenu.style.top = e.pageY + 'px';
+        
+        const menuWidth = 150;
+        const menuHeight = isMe && isFile ? 120 : 80;
+        
+        let posX = e.clientX;
+        let posY = e.clientY;
+
+        if (posX + menuWidth > window.innerWidth) {
+            posX = posX - menuWidth;
+        }
+        
+        if (posY + menuHeight > window.innerHeight) {
+            posY = posY - menuHeight;
+        }
+
+        msgCtxMenu.style.left = posX + 'px';
+        msgCtxMenu.style.top = posY + 'px';
         
         let menuHtml = '';
         if (isFile && fileObj) {
