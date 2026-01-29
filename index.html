@@ -916,64 +916,64 @@ socket.on('new_msg', ({ chatId, message }) => {
 });
 
 function sendMessage() {
-        const input = document.getElementById('msgInput');
-        const text = input.value.trim();
-        if (!text && !selectedFile) return;
-        if (!currentChatId) return;
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text && !selectedFile) return;
+    if (!currentChatId) return;
 
-        if (selectedFile) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const messageData = { 
-                    chatId: currentChatId, 
-                    text: text || '',
-                    file: {
-                        name: selectedFile.name,
-                        data: e.target.result,
-                        type: selectedFile.type
-                    }
-                };
-                socket.emit('send_msg', messageData);
-                clearFile();
-                input.value = '';
+    if (selectedFile) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const messageData = { 
+                chatId: currentChatId, 
+                text: text || '',
+                file: {
+                    name: selectedFile.name,
+                    data: e.target.result,
+                    type: selectedFile.type
+                }
             };
-            reader.readAsDataURL(selectedFile);
-        } else {
-            socket.emit('send_msg', { chatId: currentChatId, text });
-            input.value = '';
-        }
+            socket.emit('send_msg', messageData);
+            clearFile();
+        };
+        reader.readAsDataURL(selectedFile);
+    } else {
+        socket.emit('send_msg', { chatId: currentChatId, text });
     }
+    input.value = '';
+}
 
 function renderMessage(msg) {
-        const isMe = msg.senderId === currentUser.id;
-        const div = document.createElement('div');
-        div.className = `message ${isMe ? 'sent' : 'received'}`;
-        div.dataset.msgId = msg.id;
+    const isMe = msg.senderId === currentUser.id;
+    const div = document.createElement('div');
+    div.className = `message ${isMe ? 'sent' : 'received'}`;
+    div.dataset.msgId = msg.id;
+    
+    if (msg.deleted) {
+        div.innerHTML = `<div class="msg-bubble deleted"><div class="msg-text">This message has been deleted</div></div>`;
+    } else {
+        div.oncontextmenu = (e) => showMessageContextMenu(e, msg.id, isMe);
+        const editedLabel = msg.edited ? ' <span style="font-size:0.75rem;opacity:0.6">(edited)</span>' : '';
         
-        if (msg.deleted) {
-            div.innerHTML = `
-                <div class="msg-bubble deleted">
-                    <div class="msg-text">This message has been deleted</div>
-                </div>`;
-        } else {
-            div.oncontextmenu = (e) => {
-                showMessageContextMenu(e, msg.id, isMe);
-            };
-            
-            const editedLabel = msg.edited ? ' <span style="font-size:0.75rem;opacity:0.6">(edited)</span>' : '';
-            const fileAttachment = msg.file ? `<a href="${msg.file.data}" download="${msg.file.name}" style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;font-size:0.85rem;color:white;display:block;text-decoration:none;">📎 ${msg.file.name}</a>` : '';
-            
-            div.innerHTML = `
-                <div class="msg-bubble">
-                    <div class="msg-sender">${msg.senderName}</div>
-                    <div class="msg-text">${msg.text}${editedLabel}</div>
-                    ${fileAttachment}
-                    <div class="msg-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-                </div>`;
+        let fileAttachment = '';
+        if (msg.file) {
+            if (msg.file.type && msg.file.type.startsWith('image/')) {
+                fileAttachment = `<img src="${msg.file.data}" style="max-width:100%; border-radius:8px; margin-top:8px; display:block; cursor:pointer;" onclick="window.open('${msg.file.data}')">`;
+            } else {
+                fileAttachment = `<a href="${msg.file.data}" download="${msg.file.name}" style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;font-size:0.85rem;color:white;display:flex;align-items:center;gap:5px;text-decoration:none;"><span>📎</span> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${msg.file.name}</span></a>`;
+            }
         }
-        messagesListEl.appendChild(div);
+        
+        div.innerHTML = `
+            <div class="msg-bubble">
+                <div class="msg-sender">${msg.senderName}</div>
+                <div class="msg-text">${msg.text}${editedLabel}</div>
+                ${fileAttachment}
+                <div class="msg-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+            </div>`;
     }
-
+    messagesListEl.appendChild(div);
+}
     function scrollToBottom() {
         messagesListEl.scrollTop = messagesListEl.scrollHeight;
     }
@@ -1181,10 +1181,11 @@ function finalizeGroup() {
     }
 
     function clearFile() {
-        selectedFile = null;
-        fileInput.value = '';
-        filePreview.style.display = 'none';
-    }
+    selectedFile = null;
+    const fIn = document.getElementById('fileInput');
+    if(fIn) fIn.value = '';
+    filePreview.style.display = 'none';
+}
 
     document.addEventListener('click', (e) => {
         if (!emojiPicker.contains(e.target) && !e.target.classList.contains('action-btn')) {
