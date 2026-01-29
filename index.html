@@ -355,19 +355,20 @@
             margin-right: 8px;
         }
 
-        .action-btn {
+.action-btn {
             background: transparent;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            padding: 6px;
-            border-radius: 6px;
-            font-size: 1.2rem;
+            padding: 8px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
         }
         .action-btn:hover { background: var(--bg-hover); color: var(--accent); }
+        .action-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
         .msg-context-menu {
             position: absolute;
@@ -420,13 +421,15 @@
             border-radius: 10px;
         }
 
-        .close-emoji {
+      .close-emoji {
             position: absolute;
-            top: 12px;
+            top: 15px;
             right: 15px;
             cursor: pointer;
             color: var(--text-muted);
-            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: color 0.2s;
         }
         .close-emoji:hover { color: var(--danger); }
@@ -722,10 +725,16 @@
                             <button onclick="clearFile()">✕</button>
                         </div>
                         <div style="display: flex; width: 100%; align-items: center; gap: 10px;">
-                           <div class="input-actions">
-                                <button class="action-btn" onclick="toggleEmojiPicker()" title="Add emoji">😊</button>
-                                <button class="action-btn" onclick="triggerFileUpload()" title="Attach file">📎</button>
-                                <button class="action-btn" onclick="toggleTimedMenu()" title="Timed Message">🕒</button>
+                         <div class="input-actions">
+                                <button class="action-btn" onclick="toggleEmojiPicker()" title="Add emoji">
+                                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                                </button>
+                                <button class="action-btn" onclick="triggerFileUpload()" title="Attach file">
+                                    <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                                </button>
+                                <button class="action-btn" onclick="toggleTimedMenu()" title="Timed Message">
+                                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                </button>
                             </div>
                             <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
                             <input type="text" id="msgInput" class="chat-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -734,14 +743,18 @@
                     </div>
 
               <div id="emojiPicker" class="picker-popup">
-                    <span class="close-emoji" onclick="toggleEmojiPicker()">✕</span>
+                   <span class="close-emoji" onclick="toggleEmojiPicker()">
+                        <svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </span>
                     <div class="emoji-grid" id="emojiGrid"></div>
                 </div>
 
                     <div id="timedMsgMenu" class="timed-menu">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <h4>Schedule Message</h4>
-                        <span class="close-emoji" style="position:static;" onclick="toggleTimedMenu()">✕</span>
+                       <span class="close-emoji" style="position:static;" onclick="toggleTimedMenu()">
+                            <svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </span>
                     </div>
                     <div class="timed-display-box">
                         <div>Current Time: <b id="currentTimeLabel">00:00:00</b></div>
