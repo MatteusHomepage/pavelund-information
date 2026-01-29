@@ -600,7 +600,7 @@
     </div>
 
     <div id="page-chat" class="chat-container hidden">
-        <div class="app-header">
+ <div class="app-header">
            <div class="user-profile" onclick="openProfileModal()">
                 <div class="avatar" id="myAvatar"></div>
                 <span id="myName">Loading...</span>
@@ -614,7 +614,6 @@
                 </div>
             </div>
 
-            <button class="logout-btn" onclick="logout()">Sign Out</button>
             <button class="logout-btn" onclick="logout()">Sign Out</button>
         </div>
 
@@ -938,7 +937,7 @@ function renderMessage(msg) {
             };
             
             const editedLabel = msg.edited ? ' <span style="font-size:0.75rem;opacity:0.6">(edited)</span>' : '';
-            const fileAttachment = msg.file ? `<div style="margin-top:8px;padding:8px;background:#333;border-radius:6px;font-size:0.85rem;">📎 ${msg.file.name}</div>` : '';
+            const fileAttachment = msg.file ? `<a href="${msg.file.data}" download="${msg.file.name}" style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;font-size:0.85rem;color:white;display:block;text-decoration:none;">📎 ${msg.file.name}</a>` : '';
             
             div.innerHTML = `
                 <div class="msg-bubble">
