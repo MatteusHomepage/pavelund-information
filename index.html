@@ -776,6 +776,9 @@
 
     socket.on('login_success', (user) => {
         currentUser = user;
+        if ("Notification" in window) {
+            Notification.requestPermission();
+        }
         pageLogin.classList.add('hidden');
         pageChat.classList.remove('hidden');
         document.getElementById('myName').innerText = user.name;
@@ -884,10 +887,25 @@
         scrollToBottom();
     });
 
-    socket.on('new_msg', ({ chatId, message }) => {
+ socket.on('new_msg', ({ chatId, message }) => {
         if (chatId === currentChatId) {
             renderMessage(message);
             scrollToBottom();
+        }
+
+        if (message.senderId !== currentUser.id) {
+            if (Notification.permission === "granted") {
+                const notification = new Notification(`New message from ${message.senderName}`, {
+                    body: message.text || "Sent an attachment",
+                    icon: "goteborglogo.png"
+                });
+
+                notification.onclick = () => {
+                    window.focus();
+                    openChat(chatId);
+                    notification.close();
+                };
+            }
         }
     });
 
