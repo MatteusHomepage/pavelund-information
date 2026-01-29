@@ -76,7 +76,6 @@ io.on('connection', (socket) => {
 
 socket.on('send_msg', (payload) => {
     if (!currentUser) return;
-    
     const { chatId, text, file } = payload;
     const msg = {
       id: Date.now().toString(),
@@ -86,13 +85,16 @@ socket.on('send_msg', (payload) => {
       file: file || null,
       timestamp: new Date().toISOString()
     };
-
     if (!DATA.messages[chatId]) DATA.messages[chatId] = [];
     DATA.messages[chatId].push(msg);
     saveData();
-
-    io.emit('new_msg', { chatId, message: msg });
-  });
+    const chat = DATA.chats.find(c => c.id === chatId);
+    if (chat) {
+      chat.members.forEach(mId => {
+        io.to(mId).emit('new_msg', { chatId, message: msg });
+      });
+    }
+});
 
  
   socket.on('create_chat', ({ name, type, members }) => {
@@ -183,5 +185,6 @@ socket.on('delete_chat', (chatId) => {
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
 
 
