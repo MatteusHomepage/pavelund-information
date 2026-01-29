@@ -407,18 +407,19 @@
             max-height: 400px;
             overflow-y: auto;
             overflow-x: hidden;
-            width: 360px;
+            width: 350px;
         }
 
         .picker-popup::-webkit-scrollbar {
-            width: 8px;
-        }
-        .picker-popup::-webkit-scrollbar-track {
-            background: transparent;
+            width: 6px;
         }
         .picker-popup::-webkit-scrollbar-thumb {
             background: #444;
             border-radius: 10px;
+        }
+
+          .picker-popup::-webkit-scrollbar-track {
+            background: transparent;
         }
 
       .close-emoji {
@@ -434,15 +435,15 @@
         }
         .close-emoji:hover { color: var(--danger); }
 
-     .emoji-grid {
+.emoji-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
             width: 100%;
-            padding-right: 10px;
+            padding-right: 15px;
         }
 
-        .emoji-item {
+     .emoji-item {
             font-size: 1.6rem;
             cursor: pointer;
             padding: 5px;
@@ -726,14 +727,14 @@
                             <button onclick="clearFile()">✕</button>
                         </div>
                         <div style="display: flex; width: 100%; align-items: center; gap: 10px;">
-                         <div class="input-actions">
-                                <button class="action-btn" onclick="toggleEmojiPicker()" title="Add emoji">
+                     <div class="input-actions">
+                                <button id="emojiBtn" class="action-btn" onclick="toggleEmojiPicker(event)" title="Add emoji">
                                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
                                 </button>
-                                <button class="action-btn" onclick="triggerFileUpload()" title="Attach file">
+                                <button id="fileBtn" class="action-btn" onclick="triggerFileUpload()" title="Attach file">
                                     <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                                 </button>
-                                <button class="action-btn" onclick="toggleTimedMenu()" title="Timed Message">
+                                <button id="timedBtn" class="action-btn" onclick="toggleTimedMenu(event)" title="Timed Message">
                                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 </button>
                             </div>
@@ -906,18 +907,18 @@ socket.on('login_success', (user) => {
         closeModals();
     });
  
-   function setTab(tab) {
+function setTab(tab) {
         activeTab = tab;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        const buttons = document.querySelectorAll('.tab');
-        if(tab === 'dms') buttons[0].classList.add('active');
-        else buttons[1].classList.add('active');
+        const tabs = document.querySelectorAll('.tab');
+        if(tab === 'dms') tabs[0].classList.add('active');
+        else tabs[1].classList.add('active');
         
         currentChatId = null;
         activeChatPanel.classList.add('hidden');
-        emptyStatePanel.style.display = 'flex';
+        activeChatPanel.style.display = 'none';
         emptyStatePanel.classList.remove('hidden');
-        
+        emptyStatePanel.style.display = 'flex';
         renderChatList();
     }
 
@@ -1046,37 +1047,38 @@ function sendMessage() {
     input.value = '';
 }
 
-function renderMessage(msg) {
-    const isMe = msg.senderId === currentUser.id;
-    const div = document.createElement('div');
-    div.className = `message ${isMe ? 'sent' : 'received'}`;
-    div.dataset.msgId = msg.id;
-    
-    if (msg.deleted) {
-        div.innerHTML = `<div class="msg-bubble deleted"><div class="msg-text">This message has been deleted</div></div>`;
-    } else {
-        div.oncontextmenu = (e) => showMessageContextMenu(e, msg.id, isMe);
-        const editedLabel = msg.edited ? ' <span style="font-size:0.75rem;opacity:0.6">(edited)</span>' : '';
+    function renderMessage(msg) {
+        const isMe = msg.senderId === currentUser.id;
+        const div = document.createElement('div');
+        div.className = `message ${isMe ? 'sent' : 'received'}`;
+        div.dataset.msgId = msg.id;
         
-        let fileAttachment = '';
-        if (msg.file) {
-            if (msg.file.type && msg.file.type.startsWith('image/')) {
-                fileAttachment = `<img src="${msg.file.data}" style="max-width:100%; border-radius:8px; margin-top:8px; display:block; cursor:pointer;" onclick="window.open('${msg.file.data}')">`;
-            } else {
-                fileAttachment = `<a href="${msg.file.data}" download="${msg.file.name}" style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;font-size:0.85rem;color:white;display:flex;align-items:center;gap:5px;text-decoration:none;"><span>📎</span> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${msg.file.name}</span></a>`;
+        if (msg.deleted) {
+            div.innerHTML = `<div class="msg-bubble deleted"><div class="msg-text">This message has been deleted</div></div>`;
+        } else {
+            div.oncontextmenu = (e) => showMessageContextMenu(e, msg.id, isMe);
+            const editedLabel = msg.edited ? ' <span style="font-size:0.75rem;opacity:0.6">(edited)</span>' : '';
+            const msgClass = msg.isPlaceholder ? 'style="font-style:italic; opacity:0.7;"' : '';
+            
+            let fileAttachment = '';
+            if (msg.file) {
+                if (msg.file.type && msg.file.type.startsWith('image/')) {
+                    fileAttachment = `<img src="${msg.file.data}" style="max-width:100%; border-radius:8px; margin-top:8px; display:block; cursor:pointer;" onclick="window.open('${msg.file.data}')">`;
+                } else {
+                    fileAttachment = `<a href="${msg.file.data}" download="${msg.file.name}" style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;font-size:0.85rem;color:white;display:flex;align-items:center;gap:5px;text-decoration:none;"><span>📎</span> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${msg.file.name}</span></a>`;
+                }
             }
+            
+            div.innerHTML = `
+                <div class="msg-bubble">
+                    <div class="msg-sender">${msg.senderName}</div>
+                    <div class="msg-text" ${msgClass}>${msg.text}${editedLabel}</div>
+                    ${fileAttachment}
+                    <div class="msg-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                </div>`;
         }
-        
-        div.innerHTML = `
-            <div class="msg-bubble">
-                <div class="msg-sender">${msg.senderName}</div>
-                <div class="msg-text">${msg.text}${editedLabel}</div>
-                ${fileAttachment}
-                <div class="msg-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-            </div>`;
+        messagesListEl.appendChild(div);
     }
-    messagesListEl.appendChild(div);
-}
     function scrollToBottom() {
         messagesListEl.scrollTop = messagesListEl.scrollHeight;
     }
@@ -1259,12 +1261,13 @@ function finalizeGroup() {
         emojiGrid.appendChild(span);
     });
 
-    function toggleEmojiPicker(e) {
-        if(e) e.stopPropagation();
+function toggleEmojiPicker(e) {
+        e.stopPropagation();
         const picker = document.getElementById('emojiPicker');
+        const timed = document.getElementById('timedMsgMenu');
+        timed.style.display = 'none';
         const isHidden = picker.style.display === 'none' || picker.style.display === '';
         picker.style.display = isHidden ? 'block' : 'none';
-        document.getElementById('timedMsgMenu').style.display = 'none';
     }
 
 
@@ -1295,15 +1298,17 @@ function finalizeGroup() {
     filePreview.style.display = 'none';
 }
 
- document.addEventListener('click', (e) => {
-        const emojiPicker = document.getElementById('emojiPicker');
-        const timedMenu = document.getElementById('timedMsgMenu');
-        
-        if (!emojiPicker.contains(e.target)) {
-            emojiPicker.style.display = 'none';
+document.addEventListener('click', (e) => {
+        const picker = document.getElementById('emojiPicker');
+        const menu = document.getElementById('timedMsgMenu');
+        const emojiBtn = document.getElementById('emojiBtn');
+        const timedBtn = document.getElementById('timedBtn');
+
+        if (!picker.contains(e.target) && !emojiBtn.contains(e.target)) {
+            picker.style.display = 'none';
         }
-        if (!timedMenu.contains(e.target)) {
-            timedMenu.style.display = 'none';
+        if (!menu.contains(e.target) && !timedBtn.contains(e.target)) {
+            menu.style.display = 'none';
             clearInterval(timedUpdateInterval);
         }
         if (!msgCtxMenu.contains(e.target)) {
@@ -1321,11 +1326,12 @@ function finalizeGroup() {
     let timedUpdateInterval;
 
     function toggleTimedMenu(e) {
-        if(e) e.stopPropagation();
+        e.stopPropagation();
         const menu = document.getElementById('timedMsgMenu');
+        const picker = document.getElementById('emojiPicker');
+        picker.style.display = 'none';
         const isHidden = menu.style.display === 'none' || menu.style.display === '';
         menu.style.display = isHidden ? 'flex' : 'none';
-        document.getElementById('emojiPicker').style.display = 'none';
         
         if (isHidden) {
             updateTimedDisplay();
@@ -1334,6 +1340,7 @@ function finalizeGroup() {
             clearInterval(timedUpdateInterval);
         }
     }
+
 
     function updateTimedDisplay() {
         const now = new Date();
