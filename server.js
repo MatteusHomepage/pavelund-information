@@ -14,105 +14,50 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = "mongodb+srv://admin:admin@secretchatcluster.92tgwe3.mongodb.net/chatData?retryWrites=true&w=majority";
 
-const ChatSchema = new mongoose.Schema({
-    id: String,
-    name: String,
-    type: String,
-    members: [String],
-    createdBy: String
-});
-
-const MsgSchema = new mongoose.Schema({
-    chatId: String,
-    id: String,
-    senderId: String,
-    senderName: String,
-    text: String,
-    file: Object,
-    timestamp: Date,
-    edited: Boolean,
-    deleted: Boolean
-});
-
-const ScheduledSchema = new mongoose.Schema({
-    chatId: String,
-    text: String,
-    senderId: String,
-    senderName: String,
-    sendAt: Date
-});
+const ChatSchema = new mongoose.Schema({ id: String, name: String, type: String, members: [String], createdBy: String });
+const MsgSchema = new mongoose.Schema({ chatId: String, id: String, senderId: String, senderName: String, text: String, file: Object, timestamp: Date, edited: Boolean, deleted: Boolean, isPlaceholder: Boolean });
+const ScheduledSchema = new mongoose.Schema({ chatId: String, text: String, senderId: String, senderName: String, sendAt: Date });
 
 const Chat = mongoose.model('Chat', ChatSchema);
 const Message = mongoose.model('Message', MsgSchema);
 const Scheduled = mongoose.model('Scheduled', ScheduledSchema);
 
 mongoose.connect(MONGO_URI).then(async () => {
-    console.log("DB Connected Successfully");
-    try {
-        const general = await Chat.findOne({ id: 'general' });
-        if (!general) {
-            await new Chat({
-                id: 'general',
-                name: 'General Class',
-                type: 'group',
-                members: ["Vinden4554", "6767", "1234"],
-                createdBy: 'system'
-            }).save();
-            console.log("Default group created");
-        }
-    } catch (err) {
-        console.log("Initialization error:", err);
+    console.log("DB Connected");
+    const general = await Chat.findOne({ id: 'general' });
+    if (!general) {
+        await new Chat({ id: 'general', name: 'General Class', type: 'group', members: ["Vinden4554", "6767", "1234"], createdBy: 'system' }).save();
     }
-}).catch(e => {
-    console.log("DB Connection Error:", e);
-    process.exit(1);
-});
+}).catch(e => { console.log(e); process.exit(1); });
 
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.use(express.static(__dirname));
 
-const USERS_DB = {
-  "Vinden4554": { name: "Matteus Aydin", id: "Vinden4554" },
-  "6767": { name: "Andrej Petrov", id: "6767" },
-  "1234": { name: "Felix Nydén Leander", id: "1234" }
-};
+const USERS_DB = { "Vinden4554": { name: "Matteus Aydin", id: "Vinden4554" }, "6767": { name: "Andrej Petrov", id: "6767" }, "1234": { name: "Felix Nydén Leander", id: "1234" } };
 
 setInterval(async () => {
     try {
         const now = new Date();
         const due = await Scheduled.find({ sendAt: { $lte: now } });
         for (const s of due) {
-            const msgData = {
-                id: Date.now().toString(),
-                chatId: s.chatId,
-                senderId: s.senderId,
-                senderName: s.senderName,
-                text: s.text,
-                file: null,
-                timestamp: new Date(),
-                edited: false,
-                deleted: false
-            };
-            await new Message(msgData).save();
+            const msgData = { id: Date.now().toString(), chatId: s.chatId, senderId: s.senderId, senderName: s.senderName, text: s.text, file: null, timestamp: new Date(), edited: false, deleted: false };
+            const savedMsg = await new Message(msgData).save();
             const chat = await Chat.findOne({ id: s.chatId });
             if (chat) {
-                chat.members.forEach(mId => io.to(mId).emit('new_msg', { chatId: s.chatId, message: msgData }));
+                chat.members.forEach(mId => io.to(mId).emit('new_msg', { chatId: s.chatId, message: savedMsg }));
             }
             await Scheduled.deleteOne({ _id: s._id });
         }
     } catch (e) {}
-}, 10000);
+}, 5000);
 
 setInterval(() => {
     const host = process.env.RENDER_EXTERNAL_HOSTNAME;
-    if (host) {
-        fetch(`https://${host}`).catch(() => {});
-    }
+    if (host) fetch(`https://${host}`).catch(() => {});
 }, 300000);
 
 io.on('connection', (socket) => {
   let currentUser = null;
-
   socket.on('login', async (code) => {
     if (USERS_DB[code]) {
       currentUser = USERS_DB[code];
@@ -121,9 +66,7 @@ io.on('connection', (socket) => {
       socket.emit('user_list', Object.values(USERS_DB));
       const chats = await Chat.find();
       socket.emit('update_chats', chats);
-    } else {
-      socket.emit('login_fail');
-    }
+    } else { socket.emit('login_fail'); }
   });
 
   socket.on('get_messages', async (chatId) => {
@@ -133,78 +76,51 @@ io.on('connection', (socket) => {
 
   socket.on('send_msg', async (payload) => {
     if (!currentUser) return;
-    const { chatId, text, file } = payload;
-    const msg = {
-      id: Date.now().toString(),
-      chatId,
-      senderId: currentUser.id,
-      senderName: currentUser.name,
-      text: text || "",
-      file: file || null,
-      timestamp: new Date(),
-      edited: false,
-      deleted: false
-    };
-    await new Message(msg).save();
-    const chat = await Chat.findOne({ id: chatId });
-    if (chat) {
-        chat.members.forEach(mId => io.to(mId).emit('new_msg', { chatId, message: msg }));
-    }
+    const msg = { id: Date.now().toString(), chatId: payload.chatId, senderId: currentUser.id, senderName: currentUser.name, text: payload.text || "", file: payload.file || null, timestamp: new Date(), edited: false, deleted: false };
+    const saved = await new Message(msg).save();
+    const chat = await Chat.findOne({ id: payload.chatId });
+    if (chat) chat.members.forEach(mId => io.to(mId).emit('new_msg', { chatId: payload.chatId, message: saved }));
   });
 
   socket.on('schedule_msg', async (payload) => {
     if (!currentUser) return;
-    const { chatId, text, delayMs } = payload;
-    await new Scheduled({
-        chatId,
-        text,
-        senderId: currentUser.id,
-        senderName: currentUser.name,
-        sendAt: new Date(Date.now() + delayMs)
-    }).save();
+    const placeholder = { id: 'p' + Date.now(), chatId: payload.chatId, senderId: currentUser.id, senderName: currentUser.name, text: "🕒 Timed message", timestamp: new Date(), isPlaceholder: true };
+    const savedPlaceholder = await new Message(placeholder).save();
+    const chat = await Chat.findOne({ id: payload.chatId });
+    if (chat) chat.members.forEach(mId => io.to(mId).emit('new_msg', { chatId: payload.chatId, message: savedPlaceholder }));
+    
+    await new Scheduled({ chatId: payload.chatId, text: payload.text, senderId: currentUser.id, senderName: currentUser.name, sendAt: new Date(Date.now() + payload.delayMs) }).save();
   });
 
   socket.on('create_chat', async ({ name, type, members }) => {
     if (!currentUser) return;
     if(!members.includes(currentUser.id)) members.push(currentUser.id);
-    const newChat = new Chat({ 
-        id: 'c_' + Date.now(), 
-        name, 
-        type, 
-        members, 
-        createdBy: currentUser.id 
-    });
+    const newChat = new Chat({ id: 'c_' + Date.now(), name, type, members, createdBy: currentUser.id });
     await newChat.save();
     const chats = await Chat.find();
     io.emit('update_chats', chats);
   });
 
-  socket.on('rename_chat', async ({ chatId, newName }) => {
-    await Chat.updateOne({ id: chatId }, { name: newName });
-    const chats = await Chat.find();
-    io.emit('update_chats', chats);
+  socket.on('rename_chat', async (p) => {
+    await Chat.updateOne({ id: p.chatId }, { name: p.newName });
+    io.emit('update_chats', await Chat.find());
   });
 
-  socket.on('delete_chat', async (chatId) => {
-    await Chat.deleteOne({ id: chatId });
-    await Message.deleteMany({ chatId });
-    const chats = await Chat.find();
-    io.emit('update_chats', chats);
+  socket.on('delete_chat', async (id) => {
+    await Chat.deleteOne({ id });
+    await Message.deleteMany({ chatId: id });
+    io.emit('update_chats', await Chat.find());
   });
 
-  socket.on('edit_msg', async ({ chatId, messageId, newText }) => {
-    if (!currentUser) return;
-    await Message.updateOne({ id: messageId, senderId: currentUser.id }, { text: newText, edited: true });
-    io.emit('msg_edited', { chatId, messageId, newText });
+  socket.on('edit_msg', async (p) => {
+    await Message.updateOne({ id: p.messageId, senderId: currentUser.id }, { text: p.newText, edited: true });
+    io.emit('msg_edited', p);
   });
 
-  socket.on('delete_msg', async ({ chatId, messageId }) => {
-    if (!currentUser) return;
-    await Message.deleteOne({ id: messageId, senderId: currentUser.id });
-    io.emit('msg_deleted', { chatId, messageId });
+  socket.on('delete_msg', async (p) => {
+    await Message.deleteOne({ id: p.messageId, senderId: currentUser.id });
+    io.emit('msg_deleted', p);
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Server port ${PORT}`));
