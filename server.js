@@ -27,7 +27,7 @@ mongoose.connect(MONGO_URI).then(async () => {
     try {
         const general = await Chat.findOne({ id: 'general' });
         if (!general) {
-            await new Chat({ id: 'general', name: 'General Class', type: 'group', members: ["Vinden4554", "6767", "1234"], createdBy: 'system' }).save();
+            await new Chat({ id: 'general', name: 'General Class', type: 'group', members: ["Vinden4554", "6721", "1234"], createdBy: 'system' }).save();
         }
     } catch (e) {}
 }).catch(e => { console.log(e); process.exit(1); });
@@ -35,7 +35,7 @@ mongoose.connect(MONGO_URI).then(async () => {
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.use(express.static(__dirname));
 
-const USERS_DB = { "Vinden4554": { name: "Matteus Aydin", id: "Vinden4554" }, "6767": { name: "Andrej Petrov", id: "6767" }, "1234": { name: "Felix Nydén Leander", id: "1234" } };
+const USERS_DB = { "Vinden4554": { name: "Matteus Aydin", id: "Vinden4554" }, "6721": { name: "Andrej Petrov", id: "6721" }, "1234": { name: "Felix Nydén Leander", id: "1234" } };
 
 setInterval(async () => {
     try {
@@ -129,3 +129,4 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
