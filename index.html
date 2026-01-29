@@ -769,22 +769,27 @@
         }
     });
   
-    function attemptLogin() {
-        const code = loginInput.value.trim();
-        if (code) socket.emit('login', code);
-    }
-
-    socket.on('login_success', (user) => {
-        currentUser = user;
-        if ("Notification" in window) {
-            Notification.requestPermission();
+   function attemptLogin(providedCode) {
+    const code = providedCode || loginInput.value.trim();
+    if (code) {
+        localStorage.setItem('savedLoginCode', code);
+        socket.emit('login', code);
+        if (!providedCode) {
+            pageLogin.classList.add('hidden');
+            pageChat.classList.remove('hidden');
         }
-        pageLogin.classList.add('hidden');
-        pageChat.classList.remove('hidden');
-        document.getElementById('myName').innerText = user.name;
-        document.getElementById('myAvatar').innerHTML = 
-            `<img src="https://ui-avatars.com/api/?name=${user.name}&background=random" alt="">`;
-    });
+    }
+}
+
+socket.on('login_success', (user) => {
+    currentUser = user;
+    if ("Notification" in window) {
+        Notification.requestPermission();
+    }
+    document.getElementById('myName').innerText = user.name;
+    document.getElementById('myAvatar').innerHTML = 
+        `<img src="https://ui-avatars.com/api/?name=${user.name}&background=random" alt="">`;
+});
 
     socket.on('login_fail', () => {
         errorMsg.style.display = 'block';
@@ -887,27 +892,28 @@
         scrollToBottom();
     });
 
- socket.on('new_msg', ({ chatId, message }) => {
-        if (chatId === currentChatId) {
-            renderMessage(message);
-            scrollToBottom();
+socket.on('new_msg', ({ chatId, message }) => {
+    if (currentChatId === chatId) {
+        renderMessage(message);
+        scrollToBottom();
+    }
+    if (currentUser && message.senderId !== currentUser.id) {
+        if (Notification.permission === "granted") {
+            const n = new Notification(`New message from ${message.senderName}`, {
+                body: message.text || "Sent an attachment",
+                icon: "goteborglogo.ico"
+            });
+            n.onclick = () => {
+                window.focus();
+                if (pageChat.classList.contains('hidden')) {
+                    pageLogin.classList.add('hidden');
+                    pageChat.classList.remove('hidden');
+                }
+                openChat(chatId);
+            };
         }
-
-        if (message.senderId !== currentUser.id) {
-            if (Notification.permission === "granted") {
-                const notification = new Notification(`New message from ${message.senderName}`, {
-                    body: message.text || "Sent an attachment",
-                    icon: "goteborglogo.png"
-                });
-
-                notification.onclick = () => {
-                    window.focus();
-                    openChat(chatId);
-                    notification.close();
-                };
-            }
-        }
-    });
+    }
+});
 
 function sendMessage() {
         const input = document.getElementById('msgInput');
@@ -1065,9 +1071,10 @@ function finalizeGroup() {
         document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
     }
     
-    function logout() {
-        location.reload();
-    }
+  function logout() {
+    localStorage.removeItem('savedLoginCode');
+    location.reload();
+}
 
     function toggleVoiceChat() {
         const vc = document.getElementById('vcOverlay');
@@ -1187,6 +1194,13 @@ function finalizeGroup() {
             msgCtxMenu.style.display = 'none';
         }
     });
+
+    window.addEventListener('load', () => {
+    const savedCode = localStorage.getItem('savedLoginCode');
+    if (savedCode) {
+        attemptLogin(savedCode);
+    }
+});
 </script>
 
 </body>
