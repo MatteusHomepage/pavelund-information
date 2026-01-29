@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
 const mongoose = require('mongoose');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = require('node-fetch');
 
 const app = express();
 const server = http.createServer(app);
@@ -13,8 +13,6 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = "mongodb+srv://admin:admin@secretchatcluster.92tgwe3.mongodb.net/chatData?retryWrites=true&w=majority";
-
-mongoose.connect(MONGO_URI).then(() => console.log("DB Connected")).catch(e => console.log(e));
 
 const ChatSchema = new mongoose.Schema({
     id: String,
@@ -48,6 +46,28 @@ const Chat = mongoose.model('Chat', ChatSchema);
 const Message = mongoose.model('Message', MsgSchema);
 const Scheduled = mongoose.model('Scheduled', ScheduledSchema);
 
+mongoose.connect(MONGO_URI).then(async () => {
+    console.log("DB Connected Successfully");
+    try {
+        const general = await Chat.findOne({ id: 'general' });
+        if (!general) {
+            await new Chat({
+                id: 'general',
+                name: 'General Class',
+                type: 'group',
+                members: ["Vinden4554", "6767", "1234"],
+                createdBy: 'system'
+            }).save();
+            console.log("Default group created");
+        }
+    } catch (err) {
+        console.log("Initialization error:", err);
+    }
+}).catch(e => {
+    console.log("DB Connection Error:", e);
+    process.exit(1);
+});
+
 app.get('/', (req, res) => res.sendFile(__dirname + '/index.html'));
 app.use(express.static(__dirname));
 
@@ -76,9 +96,7 @@ setInterval(async () => {
             await new Message(msgData).save();
             const chat = await Chat.findOne({ id: s.chatId });
             if (chat) {
-                chat.members.forEach(mId => {
-                    io.to(mId).emit('new_msg', { chatId: s.chatId, message: msgData });
-                });
+                chat.members.forEach(mId => io.to(mId).emit('new_msg', { chatId: s.chatId, message: msgData }));
             }
             await Scheduled.deleteOne({ _id: s._id });
         }
@@ -86,8 +104,9 @@ setInterval(async () => {
 }, 10000);
 
 setInterval(() => {
-    if (process.env.RENDER_EXTERNAL_HOSTNAME) {
-        fetch(`https://${process.env.RENDER_EXTERNAL_HOSTNAME}`).catch(() => {});
+    const host = process.env.RENDER_EXTERNAL_HOSTNAME;
+    if (host) {
+        fetch(`https://${host}`).catch(() => {});
     }
 }, 300000);
 
@@ -129,9 +148,7 @@ io.on('connection', (socket) => {
     await new Message(msg).save();
     const chat = await Chat.findOne({ id: chatId });
     if (chat) {
-        chat.members.forEach(mId => {
-            io.to(mId).emit('new_msg', { chatId, message: msg });
-        });
+        chat.members.forEach(mId => io.to(mId).emit('new_msg', { chatId, message: msg }));
     }
   });
 
