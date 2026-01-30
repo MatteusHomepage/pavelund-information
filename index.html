@@ -727,7 +727,7 @@
                 const other = allUsers.find(u => u.id === chat.members.find(m => m !== currentUser.id));
                 if (other) name = other.name;
             }
-            div.innerHTML = `<div class="avatar"><span>${name.substring(0,2)}</span></div><div class="chat-info"><div class="chat-name">${name}</div><div class="chat-preview">Chat...</div></div>`;
+            div.innerHTML = `<div class="avatar"><span>${name.substring(0,2)}</span></div><div class="chat-info"><div class="chat-name">${name}</div><div class="chat-preview">Click to open</div></div>`;
             chatListEl.appendChild(div);
         });
     }
