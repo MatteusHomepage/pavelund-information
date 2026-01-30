@@ -644,7 +644,7 @@
                     <input type="password" id="loginCode" class="form-input" placeholder="•••••••">
                 </div>
                 
-                <button onclick="attemptLogin()" class="btn-primary">Fortsätt</button>
+                <button onclick="()" class="btn-primary">Fortsätt</button>
                 <div id="loginError" class="error-msg">Åtkomst nekad: Ogiltiga inloggningsuppgifter</div>
             </div>
         </div>
@@ -849,15 +849,13 @@
         }
     });
   
-   function attemptLogin(providedCode) {
+function attemptLogin(providedCode) {
     const code = providedCode || loginInput.value.trim();
     if (code) {
-        localStorage.setItem('savedLoginCode', code);
         socket.emit('login', code);
         pageLogin.classList.add('hidden');
         pageChat.classList.remove('hidden');
     }
-}
 
 socket.on('login_success', (user) => {
     currentUser = user;
@@ -869,13 +867,12 @@ socket.on('login_success', (user) => {
         `<img src="https://ui-avatars.com/api/?name=${user.name}&background=random" alt="">`;
 });
 
-    socket.on('login_fail', () => {
-        localStorage.removeItem('savedLoginCode');
-        pageLogin.classList.remove('hidden');
-        pageChat.classList.add('hidden');
-        errorMsg.style.display = 'block';
-        setTimeout(() => errorMsg.style.display = 'none', 3000);
-    });
+socket.on('login_fail', () => {
+    pageLogin.classList.remove('hidden');
+    pageChat.classList.add('hidden');
+    errorMsg.style.display = 'block';
+    setTimeout(() => errorMsg.style.display = 'none', 3000);
+});
 
     socket.on('user_list', (users) => {
         allUsers = users;
@@ -1357,12 +1354,7 @@ document.addEventListener('click', (e) => {
         }
     });
 
-    window.addEventListener('load', () => {
-    const savedCode = localStorage.getItem('savedLoginCode');
-    if (savedCode) {
-        attemptLogin(savedCode);
-    }
-});
+
 
     let timedUpdateInterval;
 
