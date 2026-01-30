@@ -804,7 +804,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   
-    let PANIC_URL = "https://www.google.com";
+    let PANIC_URL = localStorage.getItem('panicUrl') || "https://www.google.com";
     let currentUser = null;
     let currentChatId = null;
     let allChats = []; 
@@ -831,11 +831,14 @@
     const modalTitle = document.getElementById('modalTitle');
     const createGroupBtn = document.getElementById('createGroupBtn');
 
+    document.getElementById('panicUrlInput').value = PANIC_URL;
+
    function updatePanicUrl() {
         let val = document.getElementById('panicUrlInput').value.trim();
         if (!val) return;
         if (!val.startsWith('http')) val = 'https://' + val;
         PANIC_URL = val;
+        localStorage.setItem('panicUrl', val);
         alert('Panic URL updated to: ' + PANIC_URL);
     }
 
@@ -851,10 +854,8 @@
     if (code) {
         localStorage.setItem('savedLoginCode', code);
         socket.emit('login', code);
-        if (!providedCode) {
-            pageLogin.classList.add('hidden');
-            pageChat.classList.remove('hidden');
-        }
+        pageLogin.classList.add('hidden');
+        pageChat.classList.remove('hidden');
     }
 }
 
@@ -869,6 +870,9 @@ socket.on('login_success', (user) => {
 });
 
     socket.on('login_fail', () => {
+        localStorage.removeItem('savedLoginCode');
+        pageLogin.classList.remove('hidden');
+        pageChat.classList.add('hidden');
         errorMsg.style.display = 'block';
         setTimeout(() => errorMsg.style.display = 'none', 3000);
     });
@@ -1035,14 +1039,6 @@ let lastSendTime = 0;
     document.getElementById('msgInput').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
-            e.stopImmediatePropagation();
-            sendMessage();
-        }
-    }, true);
-
-    document.getElementById('msgInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
             sendMessage();
         }
     });
@@ -1063,7 +1059,6 @@ function renderMessage(msg) {
         } else {
             div.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
-                e.stopImmediatePropagation();
                 if (msg.isPlaceholder) return;
                 showMessageContextMenu(e, msg.id, isMe, !!msg.file, msg.file);
             });
@@ -1352,8 +1347,10 @@ document.addEventListener('click', (e) => {
             picker.style.display = 'none';
         }
         if (!menu.contains(e.target) && !timedBtn.contains(e.target)) {
-            menu.style.display = 'none';
-            clearInterval(timedUpdateInterval);
+            if (menu.style.display === 'flex') {
+                clearInterval(timedUpdateInterval);
+                menu.style.display = 'none';
+            }
         }
         if (!msgCtxMenu.contains(e.target)) {
             msgCtxMenu.style.display = 'none';
