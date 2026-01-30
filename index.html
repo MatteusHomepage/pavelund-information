@@ -701,13 +701,14 @@
 
     socket.on('user_list', (users) => { allUsers = users; });
 
-    function setTab(tab) {
-        activeTab = tab;
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        if(tab === 'dms') document.querySelectorAll('.tab')[0].classList.add('active');
-        else document.querySelectorAll('.tab')[1].classList.add('active');
-        renderChatList();
-    }
+function setTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    const tabs = document.querySelectorAll('.tab');
+    if (tab === 'dms') tabs[0].classList.add('active');
+    else tabs[1].classList.add('active');
+    renderChatList();
+}
 
     socket.on('update_chats', (chats) => {
         allChats = chats;
@@ -715,38 +716,55 @@
     });
 
     function renderChatList() {
-        chatListEl.innerHTML = '';
-        const filtered = allChats.filter(c => activeTab === 'groups' ? c.type === 'group' : c.type === 'dm');
-        filtered.forEach(chat => {
-            const div = document.createElement('div');
-            div.className = `chat-item ${currentChatId === chat.id ? 'active' : ''}`;
-            div.onclick = () => openChat(chat.id);
-            div.oncontextmenu = (e) => showContextMenu(e, chat.id);
-            let name = chat.name;
-            if (chat.type === 'dm') {
-                const other = allUsers.find(u => u.id === chat.members.find(m => m !== currentUser.id));
-                if (other) name = other.name;
-            }
-            div.innerHTML = `<div class="avatar"><span>${name.substring(0,2)}</span></div><div class="chat-info"><div class="chat-name">${name}</div><div class="chat-preview">Click to open</div></div>`;
-            chatListEl.appendChild(div);
-        });
-    }
-
-    function openChat(id) {
-        currentChatId = id;
-        const chat = allChats.find(c => c.id === id);
-        emptyStatePanel.style.display = 'none';
-        activeChatPanel.style.display = 'flex';
-        activeChatPanel.classList.remove('hidden');
+    chatListEl.innerHTML = '';
+    const filtered = allChats.filter(c => activeTab === 'groups' ? c.type === 'group' : c.type === 'dm');
+    
+    filtered.forEach(chat => {
+        const div = document.createElement('div');
+      
+        div.className = `chat-item ${currentChatId === chat.id ? 'active' : ''}`;
+        div.onclick = () => openChat(chat.id);
+        div.oncontextmenu = (e) => showContextMenu(e, chat.id);
+        
         let name = chat.name;
         if (chat.type === 'dm') {
             const other = allUsers.find(u => u.id === chat.members.find(m => m !== currentUser.id));
             if (other) name = other.name;
         }
-        document.getElementById('currentChatName').innerText = name;
-        document.getElementById('currentChatAvatar').innerText = name.substring(0,2).toUpperCase();
-        socket.emit('get_messages', id);
+        
+        div.innerHTML = `
+            <div class="avatar"><span>${name.substring(0,2).toUpperCase()}</span></div>
+            <div class="chat-info">
+                <div class="chat-name">${name}</div>
+                <div class="chat-preview">Click to open</div>
+            </div>
+        `;
+        chatListEl.appendChild(div);
+    });
+}
+
+  function openChat(id) {
+    currentChatId = id;
+    const chat = allChats.find(c => c.id === id);
+    if (!chat) return;
+
+    emptyStatePanel.style.display = 'none';
+    activeChatPanel.style.display = 'flex';
+    activeChatPanel.classList.remove('hidden');
+    
+    let name = chat.name;
+    if (chat.type === 'dm') {
+        const other = allUsers.find(u => u.id === chat.members.find(m => m !== currentUser.id));
+        if (other) name = other.name;
     }
+    
+    document.getElementById('currentChatName').innerText = name;
+    document.getElementById('currentChatAvatar').innerText = name.substring(0,2).toUpperCase();
+    
+    socket.emit('get_messages', id);
+
+    renderChatList();
+}
 
     socket.on('history_data', ({ chatId, messages }) => {
         if (chatId !== currentChatId) return;
