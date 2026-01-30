@@ -29,22 +29,16 @@
             height: 100vh;
         }
 
-
     .school-landing {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    
-
-    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), 
-                url('https://www.gp.se/images/article/d454d49b-b770-4d8a-a5ce-9409de139b9a/images/0npdNZpBU0RzrBB-3CK0hnzlW85s-REGULAR.jpg?width=1920&quality=75') no-repeat center center/cover;
-    
-    background-attachment: fixed;
-    
-
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: high-quality;
-}
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), 
+                    url('https://www.gp.se/images/article/d454d49b-b770-4d8a-a5ce-9409de139b9a/images/0npdNZpBU0RzrBB-3CK0hnzlW85s-REGULAR.jpg?width=1920&quality=75') no-repeat center center/cover;
+        background-attachment: fixed;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: high-quality;
+    }
 
         .school-header {
             background: rgba(30, 30, 30, 0.95);
@@ -57,17 +51,10 @@
         }
 
         .logo-area { display: flex; align-items: center; gap: 1rem; }
-        .logo-icon { 
-            width: 40px; height: 40px; 
-            background: var(--accent); 
-            color: white; 
-            border-radius: 8px; 
-            display: grid; place-items: center; font-weight: bold; font-size: 1.2rem;
-        }
         .school-title h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: 0.5px; }
         .school-title span { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
 
-.panic-settings {
+        .panic-settings {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -93,13 +80,12 @@
             width: 200px;
         }
         
-.logo-img {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    object-fit: cover;
-}
-
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
 
         .nav-links a {
             color: var(--text-muted);
@@ -164,10 +150,8 @@
 
         .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 1rem; display: none; text-align: center; }
 
-     
-        .chat-container { display: none; height: 100vh; display: flex; flex-direction: column; }
+        .chat-container { display: flex; flex-direction: column; height: 100vh; }
         
-       
         .app-header {
             height: 60px;
             background: var(--bg-panel);
@@ -197,10 +181,8 @@
             cursor: pointer;
         }
 
-      
         .app-body { flex: 1; display: flex; overflow: hidden; }
 
-       
         .sidebar {
             width: 300px;
             background: #181818;
@@ -234,7 +216,6 @@
         .chat-info { flex: 1; min-width: 0; }
         .chat-name { font-weight: 600; font-size: 0.95rem; display: flex; justify-content: space-between; }
         .chat-preview { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; }
-        .timestamp { font-size: 0.75rem; font-weight: normal; color: #666; }
 
         .fab-new {
             margin: 1rem;
@@ -247,7 +228,6 @@
             text-align: center;
         }
 
-    
         .chat-view { flex: 1; display: flex; flex-direction: column; background: var(--bg-dark); position: relative; }
         
         .chat-view-header {
@@ -260,15 +240,6 @@
             background: var(--bg-panel);
         }
         .header-info { display: flex; align-items: center; gap: 12px; }
-        .header-actions { display: flex; gap: 10px; }
-        
-        .icon-btn {
-            background: transparent; border: none;
-            color: var(--text-muted); cursor: pointer;
-            padding: 8px; border-radius: 6px; font-size: 1.1rem;
-        }
-        .icon-btn:hover { background: var(--bg-hover); color: var(--accent); }
-        .icon-btn.danger:hover { color: var(--danger); }
 
         .messages-area {
             flex: 1;
@@ -304,11 +275,6 @@
             color: #666;
             font-style: italic;
         }
-        .message.sent .msg-bubble.deleted {
-            background: transparent;
-            border: 1px dashed #444;
-            color: #666;
-        }
         
         .msg-sender { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
         .message.sent .msg-sender { display: none; }
@@ -318,35 +284,13 @@
         .msg-edited { font-size: 0.7rem; color: #888; margin-left: 5px; font-style: italic; }
         .msg-text.deleted-text { color: #888; font-style: italic; }
 
-       
-        .msg-actions {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            display: none;
-            gap: 5px;
-        }
-        .message:hover .msg-actions { display: flex; }
-        .message.sent .msg-actions { left: -60px; }
-        .message.received .msg-actions { right: -60px; }
-        
-        .action-mini {
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            color: #aaa;
-            display: grid; place-items: center;
-            cursor: pointer; font-size: 12px;
-        }
-        .action-mini:hover { color: white; border-color: #666; }
-
-       
-        .input-area {
+        .input-bar {
             padding: 1.5rem;
             background: var(--bg-panel);
             border-top: 1px solid var(--border);
-            display: flex; gap: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .input-actions {
@@ -356,7 +300,7 @@
             margin-right: 8px;
         }
 
-.action-btn {
+        .action-btn {
             background: transparent;
             border: none;
             color: var(--text-muted);
@@ -371,7 +315,7 @@
         .action-btn:hover { background: var(--bg-hover); color: var(--accent); }
         .action-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-.msg-context-menu {
+        .msg-context-menu {
             position: fixed;
             background: var(--bg-panel);
             border: 1px solid var(--border);
@@ -389,10 +333,9 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-
         .msg-context-menu .ctx-item:hover { background: var(--bg-hover); }
 
-.picker-popup {
+        .picker-popup {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -407,55 +350,31 @@
             z-index: 1000;
             max-height: 400px;
             overflow-y: auto;
-            overflow-x: hidden;
             width: 350px;
         }
 
-        .picker-popup::-webkit-scrollbar {
-            width: 6px;
-        }
-        .picker-popup::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 10px;
-        }
-
-          .picker-popup::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-      .close-emoji {
+        .close-emoji {
             position: absolute;
             top: 15px;
             right: 15px;
             cursor: pointer;
             color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.2s;
         }
-        .close-emoji:hover { color: var(--danger); }
 
-.emoji-grid {
+        .emoji-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 12px;
             width: 100%;
-            padding-right: 15px;
         }
 
-     .emoji-item {
+        .emoji-item {
             font-size: 1.6rem;
             cursor: pointer;
             padding: 5px;
             border-radius: 8px;
             text-align: center;
-            transition: background 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-
         .emoji-item:hover { background: var(--bg-hover); }
 
         .file-preview {
@@ -469,14 +388,6 @@
             font-size: 0.9rem;
         }
 
-        .file-preview button {
-            background: transparent;
-            border: none;
-            color: var(--danger);
-            cursor: pointer;
-            padding: 4px;
-        }
-
         .blank-chat-state {
             flex: 1;
             display: flex;
@@ -486,7 +397,7 @@
             font-size: 1.1rem;
         }
 
-.timed-menu {
+        .timed-menu {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -503,12 +414,6 @@
             width: 380px;
         }
 
-        .timed-menu h4 {
-            margin: 0;
-            font-size: 1.1rem;
-            color: var(--text-main);
-        }
-
         .timed-display-box {
             background: #252525;
             padding: 12px;
@@ -516,11 +421,6 @@
             border: 1px solid var(--border);
             font-size: 0.9rem;
             color: var(--text-muted);
-            line-height: 1.6;
-        }
-
-        .timed-display-box b {
-            color: var(--accent);
         }
         
         .chat-input {
@@ -530,13 +430,9 @@
             border: 1px solid var(--border);
             background: #2a2a2a;
             color: white;
-            resize: none;
             height: 46px;
-            line-height: 20px;
         }
-        .chat-input:focus { outline: none; border-color: var(--accent); }
 
-   
         .ctx-menu {
             position: fixed;
             background: var(--bg-panel);
@@ -547,7 +443,6 @@
             display: none;
             flex-direction: column;
             min-width: 160px;
-            overflow: hidden;
             padding: 5px;
         }
         .ctx-item {
@@ -556,15 +451,10 @@
             color: #e2e8f0;
             cursor: pointer;
             border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         .ctx-item:hover { background: var(--bg-hover); }
         .ctx-item.danger { color: var(--danger); }
-        .ctx-item.danger:hover { background: rgba(239, 68, 68, 0.1); }
 
-  
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8);
@@ -588,28 +478,8 @@
             border-radius: 8px;
             cursor: pointer;
         }
-        .user-row:hover { background: #333; }
 
-
-        
-      
         .hidden { display: none !important; }
-        
-        .input-area {
-            padding: 1.5rem;
-            background: var(--bg-panel);
-            border-top: 1px solid var(--border);
-            display: flex; gap: 10px;
-        }
-
-        .input-bar {
-            padding: 1.5rem;
-            background: var(--bg-panel);
-            border-top: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
     </style>
 </head>
 <body>
@@ -638,21 +508,19 @@
             <div class="login-panel">
                 <h3>Elev Åtkomst</h3>
                 <p>Ange din elev identifieringskod för att fortsätta.</p>
-                
                 <div class="form-group">
                     <label>Identifieringskod:</label>
                     <input type="password" id="loginCode" class="form-input" placeholder="•••••••">
                 </div>
-                
-                <button onclick="()" class="btn-primary">Fortsätt</button>
+                <button onclick="attemptLogin()" class="btn-primary">Fortsätt</button>
                 <div id="loginError" class="error-msg">Åtkomst nekad: Ogiltiga inloggningsuppgifter</div>
             </div>
         </div>
     </div>
 
     <div id="page-chat" class="chat-container hidden">
- <div class="app-header">
-           <div class="user-profile" onclick="openProfileModal()">
+        <div class="app-header">
+           <div class="user-profile">
                 <div class="avatar" id="myAvatar"></div>
                 <span id="myName">Loading...</span>
             </div>
@@ -674,19 +542,12 @@
                     <button class="tab active" onclick="setTab('dms')">Direct Messages</button>
                     <button class="tab" onclick="setTab('groups')">Groups</button>
                 </div>
-                
-                <div id="chatList" class="chat-list">
-                    </div>
-
-                <div class="fab-new" onclick="openNewChatModal()">
-                    + Add
-                </div>
+                <div id="chatList" class="chat-list"></div>
+                <div class="fab-new" onclick="openNewChatModal()">+ Add</div>
             </div>
 
             <div class="chat-view">
-                <div id="emptyState" class="blank-chat-state">
-            Select a chat to start messaging
-        </div>
+                <div id="emptyState" class="blank-chat-state">Select a chat to start messaging</div>
 
                 <div id="activeChat" class="hidden" style="flex:1; display:flex; flex-direction:column; height:100%;">
                     <div class="chat-view-header">
@@ -694,29 +555,24 @@
                             <div class="avatar" id="currentChatAvatar"></div>
                             <h3 id="currentChatName">Name</h3>
                         </div>
-                        <div class="header-actions">
-                           
-                        </div>
                     </div>
 
-                    <div id="messagesList" class="messages-area">
-                        </div> 
+                    <div id="messagesList" class="messages-area"></div> 
 
-                
-<div class="input-bar">
+                    <div class="input-bar">
                         <div id="filePreview" style="display: none;" class="file-preview">
                             <span id="fileName"></span>
-                            <button onclick="clearFile()">✕</button>
+                            <button onclick="clearFile()" style="background:none; border:none; color:red; cursor:pointer;">✕</button>
                         </div>
                         <div style="display: flex; width: 100%; align-items: center; gap: 10px;">
-                     <div class="input-actions">
-                                <button id="emojiBtn" class="action-btn" onclick="toggleEmojiPicker(event)" title="Add emoji">
+                            <div class="input-actions">
+                                <button id="emojiBtn" class="action-btn" onclick="toggleEmojiPicker(event)">
                                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
                                 </button>
-                                <button id="fileBtn" class="action-btn" onclick="triggerFileUpload()" title="Attach file">
+                                <button id="fileBtn" class="action-btn" onclick="triggerFileUpload()">
                                     <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                                 </button>
-                                <button id="timedBtn" class="action-btn" onclick="toggleTimedMenu(event)" title="Timed Message">
+                                <button id="timedBtn" class="action-btn" onclick="toggleTimedMenu(event)">
                                     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 </button>
                             </div>
@@ -726,44 +582,35 @@
                         </div>
                     </div>
 
-              <div id="emojiPicker" class="picker-popup">
-                  <span class="close-emoji" onclick="toggleEmojiPicker(event)">
-                        <svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </span>
-                    <div class="emoji-grid" id="emojiGrid"></div>
-                </div>
+                    <div id="emojiPicker" class="picker-popup">
+                        <span class="close-emoji" onclick="toggleEmojiPicker(event)">✕</span>
+                        <div class="emoji-grid" id="emojiGrid"></div>
+                    </div>
 
                     <div id="timedMsgMenu" class="timed-menu">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <h4>Schedule Message</h4>
-                       <span class="close-emoji" style="position:static;" onclick="toggleTimedMenu(event)">
-                            <svg viewBox="0 0 24 24" style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        </span>
+                        <div class="timed-display-box">
+                            <div>Current: <b id="currentTimeLabel">00:00:00</b></div>
+                            <div>Send at: <b id="scheduledTimeLabel">00:00:00</b></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Delay (min):</label>
+                            <input type="number" id="timedDelayInput" class="form-input" value="1" min="1" oninput="updateTimedDisplay()">
+                        </div>
+                        <div class="form-group">
+                            <label>Message:</label>
+                            <input type="text" id="timedTextInput" class="form-input">
+                        </div>
+                        <button class="btn-primary" onclick="confirmTimedMessage()">Schedule</button>
                     </div>
-                    <div class="timed-display-box">
-                        <div>Current Time: <b id="currentTimeLabel">00:00:00</b></div>
-                        <div>Message will send at: <b id="scheduledTimeLabel">00:00:00</b></div>
-                    </div>
-                    <div class="form-group" style="margin:0;">
-                        <label>Delay in minutes:</label>
-                        <input type="number" id="timedDelayInput" class="form-input" value="1" min="1" oninput="updateTimedDisplay()">
-                    </div>
-                    <div class="form-group" style="margin:0;">
-                        <label>Message text:</label>
-                        <input type="text" id="timedTextInput" class="form-input" placeholder="What should I send later?">
-                    </div>
-                    <button class="btn-primary" onclick="confirmTimedMessage()">Schedule</button>
-                </div>
 
-                <div id="msgContextMenu" class="msg-context-menu"></div>
-
+                    <div id="msgContextMenu" class="msg-context-menu"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="sidebarContextMenu" class="ctx-menu">
-        </div>
+    <div id="sidebarContextMenu" class="ctx-menu"></div>
 
     <div id="modalNewChat" class="modal-overlay">
         <div class="modal-box">
@@ -787,33 +634,16 @@
         </div>
     </div>
 
-    <div id="modalEditMsg" class="modal-overlay">
-        <div class="modal-box">
-            <h3>Edit Message</h3>
-            <input type="text" id="editMsgInput" class="form-input" style="margin:1rem 0;">
-            <div style="display:flex; gap:10px;">
-                <button class="btn-primary" onclick="saveEditedMessage()">Update</button>
-                <button class="logout-btn" onclick="closeModals()">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-
-
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  
     let PANIC_URL = localStorage.getItem('panicUrl') || "https://www.google.com";
     let currentUser = null;
     let currentChatId = null;
     let allChats = []; 
     let allUsers = []; 
     let activeTab = 'dms'; 
-    
     const socket = io();
 
- 
     const pageLogin = document.getElementById('page-login');
     const pageChat = document.getElementById('page-chat');
     const loginInput = document.getElementById('loginCode');
@@ -823,8 +653,6 @@
     const activeChatPanel = document.getElementById('activeChat');
     const emptyStatePanel = document.getElementById('emptyState');
     const ctxMenu = document.getElementById('sidebarContextMenu');
-    
-    
     const modalNewChat = document.getElementById('modalNewChat');
     const modalRename = document.getElementById('modalRename');
     const modalList = document.getElementById('modalList');
@@ -833,13 +661,13 @@
 
     document.getElementById('panicUrlInput').value = PANIC_URL;
 
-   function updatePanicUrl() {
+    function updatePanicUrl() {
         let val = document.getElementById('panicUrlInput').value.trim();
         if (!val) return;
         if (!val.startsWith('http')) val = 'https://' + val;
         PANIC_URL = val;
         localStorage.setItem('panicUrl', val);
-        alert('Panic URL updated to: ' + PANIC_URL);
+        alert('Panic URL updated');
     }
 
     document.addEventListener('keydown', (e) => {
@@ -849,126 +677,76 @@
         }
     });
   
-function attemptLogin(providedCode) {
-    const code = providedCode || loginInput.value.trim();
-    if (code) {
-        socket.emit('login', code);
+    function attemptLogin() {
+        const code = loginInput.value.trim();
+        if (code) {
+            socket.emit('login', code);
+        }
+    }
+
+    socket.on('login_success', (user) => {
+        currentUser = user;
         pageLogin.classList.add('hidden');
         pageChat.classList.remove('hidden');
-    }
-
-socket.on('login_success', (user) => {
-    currentUser = user;
-    if ("Notification" in window) {
-        Notification.requestPermission();
-    }
-    document.getElementById('myName').innerText = user.name;
-    document.getElementById('myAvatar').innerHTML = 
-        `<img src="https://ui-avatars.com/api/?name=${user.name}&background=random" alt="">`;
-});
-
-socket.on('login_fail', () => {
-    pageLogin.classList.remove('hidden');
-    pageChat.classList.add('hidden');
-    errorMsg.style.display = 'block';
-    setTimeout(() => errorMsg.style.display = 'none', 3000);
-});
-
-    socket.on('user_list', (users) => {
-        allUsers = users;
+        document.getElementById('myName').innerText = user.name;
+        document.getElementById('myAvatar').innerHTML = `<img src="https://ui-avatars.com/api/?name=${user.name}&background=random">`;
     });
 
-    socket.on('chat_exists', (chatId) => {
-        alert('You already have a chat with this person!');
-        openChat(chatId);
-        closeModals();
+    socket.on('login_fail', () => {
+        pageLogin.classList.remove('hidden');
+        pageChat.classList.add('hidden');
+        errorMsg.style.display = 'block';
+        setTimeout(() => errorMsg.style.display = 'none', 3000);
     });
- 
-function setTab(tab) {
+
+    socket.on('user_list', (users) => { allUsers = users; });
+
+    function setTab(tab) {
         activeTab = tab;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        const tabs = document.querySelectorAll('.tab');
-        if(tab === 'dms') tabs[0].classList.add('active');
-        else tabs[1].classList.add('active');
-        
-        currentChatId = null;
-        activeChatPanel.style.display = 'none';
-        emptyStatePanel.style.display = 'flex';
-        
+        if(tab === 'dms') document.querySelectorAll('.tab')[0].classList.add('active');
+        else document.querySelectorAll('.tab')[1].classList.add('active');
         renderChatList();
     }
 
-   socket.on('update_chats', (chats) => {
+    socket.on('update_chats', (chats) => {
         allChats = chats;
-        if (currentChatId && !chats.find(c => c.id === currentChatId)) {
-            currentChatId = null;
-            activeChatPanel.style.display = 'none';
-            emptyStatePanel.style.display = 'flex';
-        }
         renderChatList();
     });
 
-   function renderChatList() {
+    function renderChatList() {
         chatListEl.innerHTML = '';
-        
-        const filtered = allChats.filter(c => {
-            if (activeTab === 'groups') return c.type === 'group';
-            return c.type === 'dm';
-        });
-
+        const filtered = allChats.filter(c => activeTab === 'groups' ? c.type === 'group' : c.type === 'dm');
         filtered.forEach(chat => {
             const div = document.createElement('div');
             div.className = `chat-item ${currentChatId === chat.id ? 'active' : ''}`;
             div.onclick = () => openChat(chat.id);
             div.oncontextmenu = (e) => showContextMenu(e, chat.id);
-            
-            let displayName = chat.name;
+            let name = chat.name;
             if (chat.type === 'dm') {
-                
-                const otherUserId = chat.members.find(id => id !== currentUser.id);
-                const otherUser = allUsers.find(u => u.id === otherUserId);
-                if (otherUser) {
-                    displayName = otherUser.name;
-                }
+                const other = allUsers.find(u => u.id === chat.members.find(m => m !== currentUser.id));
+                if (other) name = other.name;
             }
-
-            div.innerHTML = `
-                <div class="avatar"><span>${displayName.substring(0,2).toUpperCase()}</span></div>
-                <div class="chat-info">
-                    <div class="chat-name">${displayName}</div>
-                    <div class="chat-preview">Click to open</div>
-                </div>
-            `;
+            div.innerHTML = `<div class="avatar"><span>${name.substring(0,2)}</span></div><div class="chat-info"><div class="chat-name">${name}</div><div class="chat-preview">Chat...</div></div>`;
             chatListEl.appendChild(div);
         });
     }
 
-function openChat(id) {
+    function openChat(id) {
         currentChatId = id;
         const chat = allChats.find(c => c.id === id);
-        
         emptyStatePanel.style.display = 'none';
         activeChatPanel.style.display = 'flex';
         activeChatPanel.classList.remove('hidden');
-        
-        let displayName = chat.name;
+        let name = chat.name;
         if (chat.type === 'dm') {
-            const otherUserId = chat.members.find(mid => mid !== currentUser.id);
-            const otherUser = allUsers.find(u => u.id === otherUserId);
-            if (otherUser) {
-                displayName = otherUser.name;
-            }
+            const other = allUsers.find(u => u.id === chat.members.find(m => m !== currentUser.id));
+            if (other) name = other.name;
         }
-        
-        document.getElementById('currentChatName').innerText = displayName;
-        document.getElementById('currentChatAvatar').innerText = displayName.substring(0,2).toUpperCase();
-        
-        renderChatList(); 
-        
-        messagesListEl.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.5">Loading...</div>';
+        document.getElementById('currentChatName').innerText = name;
+        document.getElementById('currentChatAvatar').innerText = name.substring(0,2).toUpperCase();
         socket.emit('get_messages', id);
     }
-
 
     socket.on('history_data', ({ chatId, messages }) => {
         if (chatId !== currentChatId) return;
@@ -977,53 +755,21 @@ function openChat(id) {
         scrollToBottom();
     });
 
-socket.on('new_msg', ({ chatId, message }) => {
-    if (currentChatId === chatId) {
-        renderMessage(message);
-        scrollToBottom();
-    }
-    if (currentUser && message.senderId !== currentUser.id) {
-        if (Notification.permission === "granted") {
-            const n = new Notification(`New message from ${message.senderName}`, {
-                body: message.text || "Sent an attachment",
-                icon: "goteborglogo.ico"
-            });
-            n.onclick = () => {
-                window.focus();
-                if (pageChat.classList.contains('hidden')) {
-                    pageLogin.classList.add('hidden');
-                    pageChat.classList.remove('hidden');
-                }
-                openChat(chatId);
-            };
+    socket.on('new_msg', ({ chatId, message }) => {
+        if (currentChatId === chatId) {
+            renderMessage(message);
+            scrollToBottom();
         }
-    }
-});
+    });
 
-let lastSendTime = 0;
     function sendMessage() {
-        const now = Date.now();
-        if (now - lastSendTime < 500) return;
-        
         const input = document.getElementById('msgInput');
         const text = input.value.trim();
         if (!text && !selectedFile) return;
-        if (!currentChatId) return;
-
-        lastSendTime = now;
-
         if (selectedFile) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                socket.emit('send_msg', { 
-                    chatId: currentChatId, 
-                    text: text || '',
-                    file: {
-                        name: selectedFile.name,
-                        data: e.target.result,
-                        type: selectedFile.type
-                    }
-                });
+            reader.onload = (e) => {
+                socket.emit('send_msg', { chatId: currentChatId, text, file: { name: selectedFile.name, data: e.target.result, type: selectedFile.type }});
                 clearFile();
             };
             reader.readAsDataURL(selectedFile);
@@ -1033,59 +779,28 @@ let lastSendTime = 0;
         input.value = '';
     }
 
-    document.getElementById('msgInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
+    document.getElementById('msgInput').addEventListener('keydown', (e) => { if(e.key === 'Enter') sendMessage(); });
 
-function renderMessage(msg) {
+    function renderMessage(msg) {
         const isMe = msg.senderId === currentUser.id;
         const div = document.createElement('div');
         div.className = `message ${isMe ? 'sent' : 'received'}`;
         div.dataset.msgId = msg.id;
-        
         if (msg.deleted) {
-            div.innerHTML = `
-                <div class="msg-bubble">
-                    <div class="msg-sender">${msg.senderName}</div>
-                    <div class="msg-text deleted-text">This message has been deleted</div>
-                    <div class="msg-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-                </div>`;
+            div.innerHTML = `<div class="msg-bubble"><div class="msg-text deleted-text">Deleted</div></div>`;
         } else {
-            div.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                if (msg.isPlaceholder) return;
-                showMessageContextMenu(e, msg.id, isMe, !!msg.file, msg.file);
-            });
-            
-            const editedLabel = msg.edited ? ' <span class="msg-edited">(edited)</span>' : '';
-            const msgStyle = msg.isPlaceholder ? 'style="font-style:italic; opacity:0.7;"' : '';
-            
-            let fileAttachment = '';
+            div.oncontextmenu = (e) => { e.preventDefault(); showMessageContextMenu(e, msg.id, isMe, !!msg.file, msg.file); };
+            let fileHtml = '';
             if (msg.file) {
-                if (msg.file.type && msg.file.type.startsWith('image/')) {
-                    fileAttachment = `<img src="${msg.file.data}" style="max-width:100%; border-radius:8px; margin-top:8px; display:block; cursor:pointer;" onclick="window.open('${msg.file.data}')">`;
-                } else {
-                    fileAttachment = `<div style="margin-top:8px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;font-size:0.85rem;color:white;display:flex;align-items:center;gap:5px;"><span>📎</span> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${msg.file.name}</span></div>`;
-                }
+                if (msg.file.type.startsWith('image/')) fileHtml = `<img src="${msg.file.data}" style="max-width:100%; border-radius:8px;">`;
+                else fileHtml = `<div style="background:rgba(0,0,0,0.2); padding:5px; border-radius:5px;">📎 ${msg.file.name}</div>`;
             }
-            
-            div.innerHTML = `
-                <div class="msg-bubble">
-                    <div class="msg-sender">${msg.senderName}</div>
-                    <div class="msg-text" ${msgStyle}>${msg.text}${editedLabel}</div>
-                    ${fileAttachment}
-                    <div class="msg-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-                </div>`;
+            div.innerHTML = `<div class="msg-bubble"><div class="msg-sender">${msg.senderName}</div><div class="msg-text">${msg.text}</div>${fileHtml}<div class="msg-time">${new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div></div>`;
         }
         messagesListEl.appendChild(div);
     }
-    function scrollToBottom() {
-        messagesListEl.scrollTop = messagesListEl.scrollHeight;
-    }
 
+    function scrollToBottom() { messagesListEl.scrollTop = messagesListEl.scrollHeight; }
 
     let selectedChatId = null;
     function showContextMenu(e, id) {
@@ -1094,315 +809,120 @@ function renderMessage(msg) {
         ctxMenu.style.display = 'flex';
         ctxMenu.style.left = e.pageX + 'px';
         ctxMenu.style.top = e.pageY + 'px';
-        
-        ctxMenu.innerHTML = `
-            <div class="ctx-item" onclick="openRenameModal()">Rename</div>
-            <div class="ctx-item danger" onclick="deleteChat()">Delete</div>
-        `;
+        ctxMenu.innerHTML = `<div class="ctx-item" onclick="openRenameModal()">Rename</div><div class="ctx-item danger" onclick="deleteChat()">Delete</div>`;
     }
-    document.addEventListener('click', () => ctxMenu.style.display = 'none');
-
-
-    let selectedMembers = [];
 
     function openNewChatModal() {
         modalNewChat.style.display = 'flex';
-        modalTitle.innerText = activeTab === 'groups' ? 'New Group' : 'New Direct Message';
         modalList.innerHTML = '';
         selectedMembers = [];
-        
-        
         allUsers.forEach(u => {
-            if (u.id === currentUser.id) return; 
-            
+            if (u.id === currentUser.id) return;
             const row = document.createElement('div');
             row.className = 'user-row';
-            row.innerHTML = `
-                <div class="avatar"><span>${u.name.charAt(0)}</span></div>
-                <span>${u.name}</span>
-            `;
+            row.innerHTML = `<span>${u.name}</span>`;
             row.onclick = () => {
-               
-                if (selectedMembers.includes(u.id)) {
-                    selectedMembers = selectedMembers.filter(id => id !== u.id);
-                    row.style.background = '#252525';
-                } else {
-                    selectedMembers.push(u.id);
-                    row.style.background = '#3b82f6'; 
-                }
+                if(selectedMembers.includes(u.id)) { selectedMembers = selectedMembers.filter(m => m !== u.id); row.style.background = ''; }
+                else { selectedMembers.push(u.id); row.style.background = '#3b82f6'; }
             };
             modalList.appendChild(row);
         });
-
-     
         createGroupBtn.classList.remove('hidden');
     }
 
-function finalizeGroup() {
-        if (selectedMembers.length === 0) return alert("Select at least one person!");
-
-        if (activeTab === 'dms') {
-            if (selectedMembers.length > 1) {
-                return alert("You can only create a DM with one person at a time!");
-            }
-            const otherUser = allUsers.find(u => u.id === selectedMembers[0]);
-            socket.emit('create_chat', { name: otherUser.name, type: 'dm', members: selectedMembers });
+    function finalizeGroup() {
+        if(selectedMembers.length === 0) return;
+        if(activeTab === 'dms') {
+            socket.emit('create_chat', { name: '', type: 'dm', members: selectedMembers });
         } else {
-            const name = prompt("Name this group:");
-            if (!name) return;
-            socket.emit('create_chat', { name, type: 'group', members: selectedMembers });
+            const name = prompt("Group name:");
+            if(name) socket.emit('create_chat', { name, type: 'group', members: selectedMembers });
         }
         closeModals();
     }
 
- 
-    function openRenameModal() {
-        modalRename.style.display = 'flex';
-    }
-    
+    function openRenameModal() { modalRename.style.display = 'flex'; }
     function saveGroupName() {
-        const input = document.getElementById('renameInput');
-        if (input.value && selectedChatId) {
-            socket.emit('rename_chat', { chatId: selectedChatId, newName: input.value });
-        }
+        const val = document.getElementById('renameInput').value;
+        if(val) socket.emit('rename_chat', { chatId: selectedChatId, newName: val });
         closeModals();
     }
 
     function deleteChat() {
-        if (confirm("Delete this chat?")) {
-            if (selectedChatId === currentChatId) {
-                currentChatId = null;
-                activeChatPanel.style.display = 'none';
-                emptyStatePanel.style.display = 'flex';
-            }
-            socket.emit('delete_chat', selectedChatId);
-        }
+        if(confirm("Delete?")) socket.emit('delete_chat', selectedChatId);
     }
 
-  
-    function closeModals() {
-        document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-    }
-    
-  function logout() {
-    localStorage.removeItem('savedLoginCode');
-    location.reload();
-}
+    function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+    function logout() { location.reload(); }
 
-  
-
- 
     let selectedMessageId = null;
     const msgCtxMenu = document.getElementById('msgContextMenu');
-
-function showMessageContextMenu(e, messageId, isMe, isFile, fileObj) {
-        selectedMessageId = messageId;
+    function showMessageContextMenu(e, mid, isMe, isFile, fileObj) {
+        selectedMessageId = mid;
         msgCtxMenu.style.display = 'flex';
-        
-        const menuWidth = 150;
-        const menuHeight = isMe && isFile ? 120 : 80;
-        
-        let posX = e.clientX;
-        let posY = e.clientY;
-
-        if (posX + menuWidth > window.innerWidth) {
-            posX = posX - menuWidth;
-        }
-        
-        if (posY + menuHeight > window.innerHeight) {
-            posY = posY - menuHeight;
-        }
-
-        msgCtxMenu.style.left = posX + 'px';
-        msgCtxMenu.style.top = posY + 'px';
-        
-        let menuHtml = '';
-        if (isFile && fileObj) {
-            menuHtml += `<div class="ctx-item" onclick="downloadFile('${fileObj.data}', '${fileObj.name}')">Download</div>`;
-        }
-        if (isMe) {
-            menuHtml += `<div class="ctx-item" onclick="editMessage()">Edit</div>`;
-            menuHtml += `<div class="ctx-item danger" onclick="deleteMessage()">Delete</div>`;
-        }
-        
-        if (menuHtml === '') {
-            msgCtxMenu.style.display = 'none';
-        } else {
-            msgCtxMenu.innerHTML = menuHtml;
-        }
+        msgCtxMenu.style.left = e.clientX + 'px';
+        msgCtxMenu.style.top = e.clientY + 'px';
+        let html = '';
+        if(isFile) html += `<div class="ctx-item" onclick="downloadFile('${fileObj.data}', '${fileObj.name}')">Download</div>`;
+        if(isMe) html += `<div class="ctx-item danger" onclick="deleteMessage()">Delete</div>`;
+        msgCtxMenu.innerHTML = html;
+        if(!html) msgCtxMenu.style.display = 'none';
     }
 
-       function editMessage() {
-        const msgDiv = document.querySelector(`[data-msg-id="${selectedMessageId}"]`);
-        if (!msgDiv) return;
-        const textEl = msgDiv.querySelector('.msg-text');
-        const currentText = textEl.textContent.replace(' (edited)', '').trim();
-        const newText = prompt("Edit message:", currentText);
-        if (newText !== null && newText.trim() !== "" && newText !== currentText) {
-            socket.emit('edit_msg', { chatId: currentChatId, messageId: selectedMessageId, newText: newText.trim() });
-        }
-        msgCtxMenu.style.display = 'none';
-    }
+    function deleteMessage() { socket.emit('delete_msg', { chatId: currentChatId, messageId: selectedMessageId }); msgCtxMenu.style.display = 'none'; }
+    function downloadFile(d, n) { const a = document.createElement('a'); a.href = d; a.download = n; a.click(); }
 
-function downloadFile(data, name) {
-        const link = document.createElement('a');
-        link.href = data;
-        link.download = name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        msgCtxMenu.style.display = 'none';
-    }
-    
-    function deleteMessage() {
-        if (confirm("Delete this message?")) {
-            socket.emit('delete_msg', { chatId: currentChatId, messageId: selectedMessageId });
-        }
-        msgCtxMenu.style.display = 'none';
-    }
-
-    socket.on('msg_edited', ({ chatId, messageId, newText }) => {
-        if (chatId !== currentChatId) return;
-        const msgDiv = document.querySelector(`[data-msg-id="${messageId}"]`);
-        if (msgDiv) {
-            const textEl = msgDiv.querySelector('.msg-text');
-            textEl.innerHTML = newText + ' <span style="font-size:0.75rem;opacity:0.6">(edited)</span>';
-        }
+    socket.on('msg_deleted', ({ messageId }) => {
+        const m = document.querySelector(`[data-msg-id="${messageId}"]`);
+        if(m) m.innerHTML = `<div class="msg-bubble"><div class="msg-text deleted-text">Deleted</div></div>`;
     });
 
-  socket.on('msg_deleted', ({ chatId, messageId }) => {
-        if (chatId !== currentChatId) return;
-        const msgDiv = document.querySelector(`[data-msg-id="${messageId}"]`);
-        if (msgDiv) {
-            const bubble = msgDiv.querySelector('.msg-bubble');
-            bubble.classList.add('deleted');
-            bubble.innerHTML = '<div class="msg-text">This message has been deleted</div>';
-        }
-    });
-
- 
     let selectedFile = null;
-    const fileInput = document.getElementById('fileInput');
-    const filePreview = document.getElementById('filePreview');
     const emojiPicker = document.getElementById('emojiPicker');
-    const emojiGrid = document.getElementById('emojiGrid');
-
-    const emojis = ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','👍','👎','👏','🙌','👋','🤚','✋','🖐','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁','👅','👄','💋','🩸'];
-
-    emojis.forEach(emoji => {
-        const span = document.createElement('span');
-        span.className = 'emoji-item';
-        span.textContent = emoji;
-        span.onclick = () => insertEmoji(emoji);
-        emojiGrid.appendChild(span);
+    const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😻','😽','🤲','👐','🙌','👏','🤝','👍','👎','👊','✊','🤛','🤜','🤞','✌️','🤟','🤘','👌','🤏','👈','👉','👆','👇','☝️','✋','🤚','🖐','🖖','👋','🤙','💪','🦾','🖕','✍️','🙏','🦶','🦵','🦿','💄','💋','👄','🦷','👅','👂','🦻','👃','👁','👀','🧠','🗣','👤','👥'];
+    emojis.forEach(e => {
+        const s = document.createElement('span'); s.className = 'emoji-item'; s.innerText = e;
+        s.onclick = () => { document.getElementById('msgInput').value += e; emojiPicker.style.display = 'none'; };
+        document.getElementById('emojiGrid').appendChild(s);
     });
 
-function toggleEmojiPicker(e) {
-        if (e && e.stopPropagation) e.stopPropagation();
-        const picker = document.getElementById('emojiPicker');
-        const timed = document.getElementById('timedMsgMenu');
-        timed.style.display = 'none';
-        const isHidden = picker.style.display === 'none' || picker.style.display === '';
-        picker.style.display = isHidden ? 'block' : 'none';
+    function toggleEmojiPicker(e) { e.stopPropagation(); emojiPicker.style.display = emojiPicker.style.display === 'block' ? 'none' : 'block'; }
+    function triggerFileUpload() { document.getElementById('fileInput').click(); }
+    function handleFileSelect(e) { 
+        selectedFile = e.target.files[0]; 
+        if(selectedFile) { document.getElementById('fileName').innerText = selectedFile.name; document.getElementById('filePreview').style.display = 'flex'; }
     }
+    function clearFile() { selectedFile = null; document.getElementById('filePreview').style.display = 'none'; }
 
-
-    function insertEmoji(emoji) {
-        const input = document.getElementById('msgInput');
-        input.value += emoji;
-        input.focus();
-        emojiPicker.style.display = 'none';
-    }
-
-    function triggerFileUpload() {
-        fileInput.click();
-    }
-
-    function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (file) {
-            selectedFile = file;
-            document.getElementById('fileName').textContent = file.name;
-            filePreview.style.display = 'flex';
-        }
-    }
-
-    function clearFile() {
-    selectedFile = null;
-    const fIn = document.getElementById('fileInput');
-    if(fIn) fIn.value = '';
-    filePreview.style.display = 'none';
-}
-
-document.addEventListener('click', (e) => {
-        const picker = document.getElementById('emojiPicker');
-        const menu = document.getElementById('timedMsgMenu');
-        const emojiBtn = document.getElementById('emojiBtn');
-        const timedBtn = document.getElementById('timedBtn');
-
-        if (!picker.contains(e.target) && !emojiBtn.contains(e.target)) {
-            picker.style.display = 'none';
-        }
-        if (!menu.contains(e.target) && !timedBtn.contains(e.target)) {
-            if (menu.style.display === 'flex') {
-                clearInterval(timedUpdateInterval);
-                menu.style.display = 'none';
-            }
-        }
-        if (!msgCtxMenu.contains(e.target)) {
-            msgCtxMenu.style.display = 'none';
-        }
+    document.addEventListener('click', () => { 
+        emojiPicker.style.display = 'none'; 
+        msgCtxMenu.style.display = 'none'; 
+        ctxMenu.style.display = 'none';
+        document.getElementById('timedMsgMenu').style.display = 'none';
     });
 
-
-
-    let timedUpdateInterval;
-
-function toggleTimedMenu(e) {
-        if (e && e.stopPropagation) e.stopPropagation();
-        const menu = document.getElementById('timedMsgMenu');
-        const picker = document.getElementById('emojiPicker');
-        picker.style.display = 'none';
-        const isHidden = menu.style.display === 'none' || menu.style.display === '';
-        menu.style.display = isHidden ? 'flex' : 'none';
-        
-        if (isHidden) {
-            updateTimedDisplay();
-            timedUpdateInterval = setInterval(updateTimedDisplay, 1000);
-        } else {
-            clearInterval(timedUpdateInterval);
-        }
+    let timedInt;
+    function toggleTimedMenu(e) {
+        e.stopPropagation();
+        const m = document.getElementById('timedMsgMenu');
+        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+        if(m.style.display === 'flex') { updateTimedDisplay(); timedInt = setInterval(updateTimedDisplay, 1000); }
+        else clearInterval(timedInt);
     }
-
 
     function updateTimedDisplay() {
         const now = new Date();
-        const delay = parseInt(document.getElementById('timedDelayInput').value) || 0;
-        const future = new Date(now.getTime() + delay * 60000);
-        
+        const del = parseInt(document.getElementById('timedDelayInput').value) || 0;
         document.getElementById('currentTimeLabel').innerText = now.toLocaleTimeString();
-        document.getElementById('scheduledTimeLabel').innerText = future.toLocaleTimeString();
+        document.getElementById('scheduledTimeLabel').innerText = new Date(now.getTime() + del * 60000).toLocaleTimeString();
     }
 
     function confirmTimedMessage() {
-        const delay = parseInt(document.getElementById('timedDelayInput').value);
-        const text = document.getElementById('timedTextInput').value.trim();
-        
-        if (!text) return alert("Enter a message");
-        if (!delay || delay < 1) return alert("Enter valid minutes");
-        if (!currentChatId) return alert("Select a chat first");
-
-        socket.emit('schedule_msg', {
-            chatId: currentChatId,
-            text: text,
-            delayMs: delay * 60000
-        });
-
-        alert(`Message scheduled to send in ${delay} minutes.`);
-        document.getElementById('timedTextInput').value = '';
-        toggleTimedMenu();
+        const del = parseInt(document.getElementById('timedDelayInput').value);
+        const txt = document.getElementById('timedTextInput').value.trim();
+        if(txt && del > 0) socket.emit('schedule_msg', { chatId: currentChatId, text: txt, delayMs: del * 60000 });
+        document.getElementById('timedMsgMenu').style.display = 'none';
     }
 </script>
-
 </body>
 </html>
