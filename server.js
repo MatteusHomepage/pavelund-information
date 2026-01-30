@@ -37,12 +37,17 @@ app.use(express.static(__dirname));
 
 const USERS_DB = { "Vinden4554": { name: "Matteus Aydin", id: "Vinden4554" }, "6721": { name: "Andrej Petrov", id: "6721" }, "1234": { name: "Felix Nydén Leander", id: "1234" } };
 
+const broadcastChatUpdate = async (chat) => {
+    const allChats = await Chat.find();
+    chat.members.forEach(mId => io.to(mId).emit('update_chats', allChats));
+};
+
 setInterval(async () => {
     try {
         const now = new Date();
         const due = await Scheduled.find({ sendAt: { $lte: now } });
         for (const s of due) {
-            const msgData = { id: Date.now().toString(), chatId: s.chatId, senderId: s.senderId, senderName: s.senderName, text: s.text, file: null, timestamp: new Date(), edited: false, deleted: false, isPlaceholder: false };
+            const msgData = { id: 'm' + Date.now() + Math.random().toString(36).substr(2, 5), chatId: s.chatId, senderId: s.senderId, senderName: s.senderName, text: s.text, file: null, timestamp: new Date(), edited: false, deleted: false, isPlaceholder: false };
             const savedMsg = await new Message(msgData).save();
             const chat = await Chat.findOne({ id: s.chatId });
             if (chat) {
@@ -67,8 +72,8 @@ io.on('connection', (socket) => {
       socket.join(currentUser.id);
       socket.emit('login_success', currentUser);
       socket.emit('user_list', Object.values(USERS_DB));
-      const chats = await Chat.find();
-      socket.emit('update_chats', chats);
+      const chats = await Chat.find({ members: currentUser.id });
+      socket.emit('update_chats', await Chat.find());
     } else { socket.emit('login_fail'); }
   });
 
@@ -79,7 +84,7 @@ io.on('connection', (socket) => {
 
   socket.on('send_msg', async (payload) => {
     if (!currentUser) return;
-    const msg = { id: Date.now().toString(), chatId: payload.chatId, senderId: currentUser.id, senderName: currentUser.name, text: payload.text || "", file: payload.file || null, timestamp: new Date(), edited: false, deleted: false, isPlaceholder: false };
+    const msg = { id: 'm' + Date.now() + Math.random().toString(36).substr(2, 5), chatId: payload.chatId, senderId: currentUser.id, senderName: currentUser.name, text: payload.text || "", file: payload.file || null, timestamp: new Date(), edited: false, deleted: false, isPlaceholder: false };
     const saved = await new Message(msg).save();
     const chat = await Chat.findOne({ id: payload.chatId });
     if (chat) chat.members.forEach(mId => io.to(mId).emit('new_msg', { chatId: payload.chatId, message: saved }));
@@ -97,27 +102,43 @@ io.on('connection', (socket) => {
   socket.on('create_chat', async ({ name, type, members }) => {
     if (!currentUser) return;
     if(!members.includes(currentUser.id)) members.push(currentUser.id);
+    
+    if (type === 'dm') {
+        const existing = await Chat.findOne({ type: 'dm', members: { $all: members, $size: 2 } });
+        if (existing) return;
+    }
+
     const newChat = new Chat({ id: 'c_' + Date.now(), name, type, members, createdBy: currentUser.id });
     await newChat.save();
     const chats = await Chat.find();
-    io.emit('update_chats', chats);
+    members.forEach(mId => io.to(mId).emit('update_chats', chats));
   });
 
   socket.on('rename_chat', async (p) => {
-    await Chat.updateOne({ id: p.chatId }, { name: p.newName });
-    io.emit('update_chats', await Chat.find());
+    const chat = await Chat.findOne({ id: p.chatId });
+    if (chat) {
+        await Chat.updateOne({ id: p.chatId }, { name: p.newName });
+        const chats = await Chat.find();
+        chat.members.forEach(mId => io.to(mId).emit('update_chats', chats));
+    }
   });
 
   socket.on('delete_chat', async (id) => {
-    await Chat.deleteOne({ id });
-    await Message.deleteMany({ chatId: id });
-    io.emit('update_chats', await Chat.find());
+    const chat = await Chat.findOne({ id });
+    if (chat) {
+        const members = chat.members;
+        await Chat.deleteOne({ id });
+        await Message.deleteMany({ chatId: id });
+        const chats = await Chat.find();
+        members.forEach(mId => io.to(mId).emit('update_chats', chats));
+    }
   });
 
   socket.on('edit_msg', async (p) => {
     if (!currentUser) return;
     await Message.updateOne({ id: p.messageId, senderId: currentUser.id }, { text: p.newText, edited: true });
-    io.emit('msg_edited', p);
+    const chat = await Chat.findOne({ id: p.chatId });
+    if (chat) chat.members.forEach(mId => io.to(mId).emit('msg_edited', p));
   });
 
   socket.on('delete_msg', async (p) => {
@@ -129,4 +150,3 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
